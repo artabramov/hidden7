@@ -9,6 +9,8 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 from app.constants import (
     GOCRYPTFS_PASSPHRASE_FILENAME,
     FERNET_ENCRYPTION_KEY_FILENAME,
+    VERSITY_ACCESS_KEY_FILENAME,
+    VERSITY_SECRET_KEY_FILENAME,
 )
 
 
@@ -33,6 +35,8 @@ class Config(BaseSettings):
     LOG_FORMAT: str
     CORS_ALLOW_ORIGINS: str
     CORS_MAX_AGE_SECONDS: int
+    VERSITY_HOST: str
+    VERSITY_PORT: int
 
     @cached_property
     def GOCRYPTFS_PASSPHRASE_PATH(self) -> str:
@@ -46,6 +50,20 @@ class Config(BaseSettings):
         return os.path.join(
             self.INSTALL_SECRETS,
             FERNET_ENCRYPTION_KEY_FILENAME,
+        )
+
+    @cached_property
+    def VERSITY_ACCESS_KEY_PATH(self) -> str:
+        return os.path.join(
+            self.INSTALL_SECRETS,
+            VERSITY_ACCESS_KEY_FILENAME,
+        )
+
+    @cached_property
+    def VERSITY_SECRET_KEY_PATH(self) -> str:
+        return os.path.join(
+            self.INSTALL_SECRETS,
+            VERSITY_SECRET_KEY_FILENAME,
         )
 
     model_config = SettingsConfigDict(

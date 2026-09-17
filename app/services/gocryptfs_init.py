@@ -12,6 +12,7 @@ from app.io import delete, isfile, write
 from app.security.encryption import encrypt_passphrase, generate_fernet_key
 from app.security.randoms import generate_random_string
 from app.runtime.cipherdir import cipherdir_create
+from app.runtime.versity import versity_create
 
 log = logging.getLogger(__name__)
 
@@ -69,6 +70,8 @@ async def gocryptfs_init(master_password: str) -> None:
                 fernet_key.encode("utf-8")
             )
 
+            await versity_create()
+
         except Exception:
             log.exception("msg=gocryptfs_initialization_failed")
 
@@ -85,5 +88,8 @@ async def gocryptfs_init(master_password: str) -> None:
             ))
 
             await delete(config.FERNET_ENCRYPTION_KEY_PATH)
+
+            await delete(config.VERSITY_ACCESS_KEY_PATH)
+            await delete(config.VERSITY_SECRET_KEY_PATH)
 
             raise
