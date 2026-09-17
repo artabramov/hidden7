@@ -7,7 +7,6 @@ import os
 from app.config import get_config
 from app.constants import GOCRYPTFS_PASSPHRASE_LENGTH
 from app.errors import BadGatewayError
-# from app.hooks import Events, hooks
 from app.locks import LockType, locks
 from app.io import delete, isfile, write
 from app.security.encryption import encrypt_passphrase, generate_fernet_key
@@ -88,5 +87,3 @@ async def gocryptfs_init(master_password: str) -> None:
             await delete(config.FERNET_ENCRYPTION_KEY_PATH)
 
             raise
-
-    # await hooks.emit(Events.GOCRYPTFS_INITIALIZED)

@@ -30,6 +30,7 @@ from app.middleware.request_logging import request_logging_middleware
 from app.middleware.security_headers import security_headers_middleware
 
 from app.routers.gocryptfs_init import router as gocryptfs_init_router
+from app.routers.gocryptfs_mount import router as gocryptfs_mount_router
 
 config = get_config()
 
@@ -59,6 +60,7 @@ cors_setup_middleware(app)
 app.add_middleware(GZipMiddleware)
 
 app.include_router(gocryptfs_init_router, prefix=config.API_PREFIX)
+app.include_router(gocryptfs_mount_router, prefix=config.API_PREFIX)
 
 app.add_exception_handler(UnauthorizedError, unauthorized_handler)
 app.add_exception_handler(InternalServerError, internal_server_error_handler)
