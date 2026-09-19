@@ -61,6 +61,8 @@ async def gocryptfs_mount(master_password: str) -> None:
         await versity_start(
             config.VERSITY_HOST,
             config.VERSITY_PORT,
+            config.VERSITY_WEBGUI_HOST,
+            config.VERSITY_WEBGUI_PORT,
             config.INSTALL_MOUNTPOINT,
             access_key,
             secret_key,

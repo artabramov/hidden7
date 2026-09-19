@@ -24,6 +24,7 @@ install:
 	--security-opt apparmor:unconfined \
 	-p $(PORT):80 \
 	-p $(VERSITY_PORT):$(VERSITY_PORT) \
+	-p $(VERSITY_WEBGUI_PORT):$(VERSITY_WEBGUI_PORT) \
 	-v hidden-cipherdir:$(INSTALL_CIPHERDIR) \
 	-v $(VOLUME_SECRETS):$(INSTALL_SECRETS) \
 	--name hidden \

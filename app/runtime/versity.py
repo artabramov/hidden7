@@ -64,6 +64,8 @@ async def versity_create(
 async def versity_start(
     host: str,
     port: int,
+    webgui_host: str,
+    webgui_port: int,
     mountpoint: str,
     access_key: str,
     secret_key: str,
@@ -81,6 +83,8 @@ async def versity_start(
             "versitygw",
             "--port",
             f"{host}:{port}",
+            "--webui",
+            f"{webgui_host}:{webgui_port}",
             "posix",
             mountpoint,
             env=env,

@@ -37,6 +37,8 @@ class Config(BaseSettings):
     CORS_MAX_AGE_SECONDS: int
     VERSITY_HOST: str
     VERSITY_PORT: int
+    VERSITY_WEBGUI_HOST: str
+    VERSITY_WEBGUI_PORT: int
 
     @cached_property
     def GOCRYPTFS_PASSPHRASE_PATH(self) -> str:
