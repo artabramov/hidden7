@@ -11,6 +11,8 @@ from app.constants import (
     FERNET_ENCRYPTION_KEY_FILENAME,
     VERSITY_ACCESS_KEY_FILENAME,
     VERSITY_SECRET_KEY_FILENAME,
+    VERSITY_DATA_DIRNAME,
+    VERSITY_IAM_DIRNAME,
 )
 
 
@@ -68,6 +70,20 @@ class Config(BaseSettings):
         return os.path.join(
             self.INSTALL_SECRETS,
             VERSITY_SECRET_KEY_FILENAME,
+        )
+
+    @cached_property
+    def VERSITY_DATA_PATH(self) -> str:
+        return os.path.join(
+            self.INSTALL_MOUNTPOINT,
+            VERSITY_DATA_DIRNAME,
+        )
+
+    @cached_property
+    def VERSITY_IAM_PATH(self) -> str:
+        return os.path.join(
+            self.INSTALL_MOUNTPOINT,
+            VERSITY_IAM_DIRNAME,
         )
 
     model_config = SettingsConfigDict(

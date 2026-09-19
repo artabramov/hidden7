@@ -7,7 +7,7 @@ from app.config import get_config
 from app.errors import UnauthorizedError
 from app.locks import LockType, locks
 from app.io import isdir, mktree, read
-from app.runtime.cipherdir import cipherdir_mount
+from app.runtime.cipherdir import cipherdir_mount, cipherdir_unmount
 from app.runtime.versity import versity_start
 from app.security.encryption import decrypt_passphrase
 
@@ -50,13 +50,32 @@ async def gocryptfs_mount(master_password: str) -> None:
             mountpoint=config.INSTALL_MOUNTPOINT,
         )
 
-        access_key = (
-            await read(config.VERSITY_ACCESS_KEY_PATH)
-        ).decode("utf-8")
+        try:
+            if not await isdir(config.VERSITY_DATA_PATH):
+                await mktree(config.VERSITY_DATA_PATH)
 
-        secret_key = (
-            await read(config.VERSITY_SECRET_KEY_PATH)
-        ).decode("utf-8")
+            if not await isdir(config.VERSITY_IAM_PATH):
+                await mktree(config.VERSITY_IAM_PATH)
+
+            access_key = (
+                await read(config.VERSITY_ACCESS_KEY_PATH)
+            ).decode("utf-8")
+
+            secret_key = (
+                await read(config.VERSITY_SECRET_KEY_PATH)
+            ).decode("utf-8")
+
+        except Exception:
+            log.exception("msg=gocryptgs_mount_failed")
+
+            try:
+                await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
+                log.warning("msg=gocryptfs_mount_rollback_completed")
+
+            except Exception:
+                log.exception("msg=gocryptfs_mount_rollback_failed")
+
+            raise
 
         await versity_start(
             config.VERSITY_HOST,
@@ -65,7 +84,8 @@ async def gocryptfs_mount(master_password: str) -> None:
             config.VERSITY_WEBGUI_PORT,
             config.VERSITY_WEBGUI_GATEWAY,
             config.VERSITY_WEBGUI_CORS_ALLOW_ORIGIN,
-            config.INSTALL_MOUNTPOINT,
+            config.VERSITY_DATA_PATH,
+            config.VERSITY_IAM_PATH,
             access_key,
             secret_key,
         )
