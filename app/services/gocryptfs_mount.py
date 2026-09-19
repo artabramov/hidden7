@@ -65,8 +65,21 @@ async def gocryptfs_mount(master_password: str) -> None:
                 await read(config.VERSITY_SECRET_KEY_PATH)
             ).decode("utf-8")
 
+            await versity_start(
+                config.VERSITY_HOST,
+                config.VERSITY_PORT,
+                config.VERSITY_WEBGUI_HOST,
+                config.VERSITY_WEBGUI_PORT,
+                config.VERSITY_WEBGUI_GATEWAY,
+                config.VERSITY_WEBGUI_CORS_ALLOW_ORIGIN,
+                config.VERSITY_DATA_PATH,
+                config.VERSITY_IAM_PATH,
+                access_key,
+                secret_key,
+            )
+
         except Exception:
-            log.exception("msg=gocryptgs_mount_failed")
+            log.exception("msg=gocryptfs_mount_failed")
 
             try:
                 await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
@@ -76,16 +89,3 @@ async def gocryptfs_mount(master_password: str) -> None:
                 log.exception("msg=gocryptfs_mount_rollback_failed")
 
             raise
-
-        await versity_start(
-            config.VERSITY_HOST,
-            config.VERSITY_PORT,
-            config.VERSITY_WEBGUI_HOST,
-            config.VERSITY_WEBGUI_PORT,
-            config.VERSITY_WEBGUI_GATEWAY,
-            config.VERSITY_WEBGUI_CORS_ALLOW_ORIGIN,
-            config.VERSITY_DATA_PATH,
-            config.VERSITY_IAM_PATH,
-            access_key,
-            secret_key,
-        )
