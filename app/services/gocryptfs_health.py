@@ -9,6 +9,7 @@ from app.config import get_config
 from app.constants import WATCHDOG_HEARTBEAT_PATH
 from app.io import ismount
 from app.runtime.cipherdir import is_cipherdir_created
+from app.runtime.versity import is_versity_created, is_versity_running
 
 
 async def gocryptfs_health() -> dict:
@@ -24,6 +25,12 @@ async def gocryptfs_health() -> dict:
     cipherdir_created = await is_cipherdir_created(config.INSTALL_CIPHERDIR)
     cipherdir_mounted = await ismount(config.INSTALL_MOUNTPOINT)
 
+    versity_created = await is_versity_created(
+        config.VERSITY_ACCESS_KEY_PATH,
+        config.VERSITY_SECRET_KEY_PATH,
+    )
+    versity_running = await is_versity_running()
+
     watchdog_path = Path(WATCHDOG_HEARTBEAT_PATH)
     watchdog_alive = False
     if watchdog_path.is_file():
@@ -35,6 +42,8 @@ async def gocryptfs_health() -> dict:
     return {
         "is_cipherdir_created": cipherdir_created,
         "is_cipherdir_mounted": cipherdir_mounted,
+        "is_versity_created": versity_created,
+        "is_versity_running": versity_running,
         "is_watchdog_alive": watchdog_alive,
         "unix_timestamp": int(now_local.timestamp()),
         "timezone_name": _timezone_name(now_local),

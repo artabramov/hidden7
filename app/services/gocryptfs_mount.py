@@ -8,6 +8,7 @@ from app.errors import UnauthorizedError
 from app.locks import LockType, locks
 from app.io import isdir, mktree, read
 from app.runtime.cipherdir import cipherdir_mount
+from app.runtime.versity import versity_start
 from app.security.encryption import decrypt_passphrase
 
 log = logging.getLogger(__name__)
@@ -18,11 +19,9 @@ log = logging.getLogger(__name__)
 
 async def gocryptfs_mount(master_password: str) -> None:
     """
-    Mount the encrypted storage by decrypting the stored passphrase
-    with the master password, mounting the gocryptfs filesystem,
-    ensuring mountpoint directories exist (db, buckets, tmp),
-    creating ORM tables if missing, and checking database integrity.
-    If a post-mount step fails, the mount is rolled back.
+    Mount the encrypted storage by decrypting the stored passphrase with
+    the master password, mounting the gocryptfs filesystem, and starting
+    the VersityGW S3 server.
     """
     config = get_config()
 
@@ -49,4 +48,20 @@ async def gocryptfs_mount(master_password: str) -> None:
             passphrase=passphrase_bytes.decode("utf-8"),
             cipherdir=config.INSTALL_CIPHERDIR,
             mountpoint=config.INSTALL_MOUNTPOINT,
+        )
+
+        access_key = (
+            await read(config.VERSITY_ACCESS_KEY_PATH)
+        ).decode("utf-8")
+
+        secret_key = (
+            await read(config.VERSITY_SECRET_KEY_PATH)
+        ).decode("utf-8")
+
+        await versity_start(
+            config.VERSITY_HOST,
+            config.VERSITY_PORT,
+            config.INSTALL_MOUNTPOINT,
+            access_key,
+            secret_key,
         )

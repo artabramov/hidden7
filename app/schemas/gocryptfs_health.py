@@ -19,6 +19,12 @@ class GocryptfsHealthResponse(BaseModel):
     is_cipherdir_mounted: bool = Field(
         description="Whether the gocryptfs mountpoint is currently mounted.",
     )
+    is_versity_created: bool = Field(
+        description="Whether the VersityGW credentials have been created.",
+    )
+    is_versity_running: bool = Field(
+        description="Whether the VersityGW process is currently running.",
+    )
     is_watchdog_alive: bool = Field(
         description=(
             "Whether the watchdog heartbeat is fresh within "

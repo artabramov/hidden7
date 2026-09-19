@@ -8,6 +8,7 @@ from app.errors import UnauthorizedError
 from app.locks import LockType, locks
 from app.io import read
 from app.runtime.cipherdir import cipherdir_unmount
+from app.runtime.versity import versity_stop
 from app.security.encryption import decrypt_passphrase
 
 log = logging.getLogger(__name__)
@@ -17,9 +18,8 @@ async def gocryptfs_unmount(
     master_password: str,
 ) -> None:
     """
-    Unmount the encrypted storage by verifying the master password
-    against the stored passphrase and unmounting the gocryptfs
-    filesystem.
+    Stop the VersityGW S3 server and unmount the encrypted storage
+    after verifying the master password against the stored passphrase.
     """
     config = get_config()
 
@@ -39,4 +39,5 @@ async def gocryptfs_unmount(
             log.warning("msg=passphrase_invalid")
             raise UnauthorizedError
 
+        await versity_stop()
         await cipherdir_unmount(mountpoint=config.INSTALL_MOUNTPOINT)
