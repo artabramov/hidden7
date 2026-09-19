@@ -70,7 +70,10 @@ async def gocryptfs_init(master_password: str) -> None:
                 fernet_key.encode("utf-8")
             )
 
-            await versity_create()
+            await versity_create(
+                config.VERSITY_ACCESS_KEY_PATH,
+                config.VERSITY_SECRET_KEY_PATH,
+            )
 
         except Exception:
             log.exception("msg=gocryptfs_initialization_failed")
@@ -88,7 +91,6 @@ async def gocryptfs_init(master_password: str) -> None:
             ))
 
             await delete(config.FERNET_ENCRYPTION_KEY_PATH)
-
             await delete(config.VERSITY_ACCESS_KEY_PATH)
             await delete(config.VERSITY_SECRET_KEY_PATH)
 
