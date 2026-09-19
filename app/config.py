@@ -39,6 +39,7 @@ class Config(BaseSettings):
     VERSITY_PORT: int
     VERSITY_WEBGUI_HOST: str
     VERSITY_WEBGUI_PORT: int
+    VERSITY_WEBGUI_CORS_ALLOW_ORIGIN: str
 
     @cached_property
     def GOCRYPTFS_PASSPHRASE_PATH(self) -> str:
