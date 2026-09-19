@@ -11,8 +11,8 @@ from app.locks import LockType, locks
 from app.io import delete, isfile, write
 from app.security.encryption import encrypt_passphrase, generate_fernet_key
 from app.security.randoms import generate_random_string
-from app.runtime.cipherdir import cipherdir_create
-from app.runtime.versity import versity_create
+from app.runtime.cipherdir import cipherdir_create, is_cipherdir_created
+from app.runtime.versity import versity_create, is_versity_created
 
 log = logging.getLogger(__name__)
 
@@ -24,8 +24,8 @@ log = logging.getLogger(__name__)
 # encrypted data therefore requires both the passphrase and the master
 # password.
 
-# TODO: Re-check cipherdir/passphrase/fernet under the WRITE lock
-# before creating artifacts. Two concurrent init requests can both
+# TODO: Re-check cipherdir/passphrase/fernet/versity under the WRITE
+# lock before creating artifacts. Two concurrent init requests can both
 # pass the outer gates; the second may then overwrite secrets after
 # the first has already completed successfully.
 
@@ -41,8 +41,23 @@ async def gocryptfs_init(master_password: str) -> None:
     """
     config = get_config()
 
+    if await isfile(config.GOCRYPTFS_PASSPHRASE_PATH):
+        log.warning("msg=gocryptfs_passphrase_already_exists")
+        raise BadGatewayError
+
+    if await is_cipherdir_created(config.INSTALL_CIPHERDIR):
+        log.warning("msg=cipherdir_already_exists")
+        raise BadGatewayError
+
     if await isfile(config.FERNET_ENCRYPTION_KEY_PATH):
         log.warning("msg=fernet_key_already_exists")
+        raise BadGatewayError
+
+    if await is_versity_created(
+        config.VERSITY_ACCESS_KEY_PATH,
+        config.VERSITY_SECRET_KEY_PATH,
+    ):
+        log.warning("msg=versity_already_exists")
         raise BadGatewayError
 
     async with locks.lock_directory(config.INSTALL_SECRETS, LockType.WRITE):
