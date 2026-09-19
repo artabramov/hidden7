@@ -23,6 +23,7 @@ install:
 	--device /dev/fuse \
 	--security-opt apparmor:unconfined \
 	-p $(PORT):80 \
+	-p $(VERSITY_PORT):$(VERSITY_PORT) \
 	-v hidden-cipherdir:$(INSTALL_CIPHERDIR) \
 	-v $(VOLUME_SECRETS):$(INSTALL_SECRETS) \
 	--name hidden \
