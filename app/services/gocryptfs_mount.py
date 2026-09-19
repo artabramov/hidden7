@@ -63,6 +63,7 @@ async def gocryptfs_mount(master_password: str) -> None:
             config.VERSITY_PORT,
             config.VERSITY_WEBGUI_HOST,
             config.VERSITY_WEBGUI_PORT,
+            config.VERSITY_WEBGUI_GATEWAY,
             config.VERSITY_WEBGUI_CORS_ALLOW_ORIGIN,
             config.INSTALL_MOUNTPOINT,
             access_key,
