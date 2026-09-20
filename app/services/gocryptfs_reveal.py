@@ -12,7 +12,7 @@ from app.security.encryption import decrypt_passphrase
 log = logging.getLogger(__name__)
 
 
-async def gocryptfs_reveal(master_password: str) -> str:
+async def gocryptfs_reveal(master_password: str) -> tuple[str, str, str]:
     """
     Decrypt and return the stored gocryptfs passphrase using the
     provided master password.
@@ -35,4 +35,16 @@ async def gocryptfs_reveal(master_password: str) -> str:
             log.warning("msg=passphrase_invalid")
             raise UnauthorizedError
 
-        return passphrase.decode("utf-8")
+        versity_access_key = (
+            await read(config.VERSITY_ACCESS_KEY_PATH)
+        ).decode("utf-8")
+
+        versity_secret_key = (
+            await read(config.VERSITY_SECRET_KEY_PATH)
+        ).decode("utf-8")
+
+        return (
+            passphrase.decode("utf-8"),
+            versity_access_key,
+            versity_secret_key,
+        )

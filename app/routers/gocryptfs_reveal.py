@@ -40,21 +40,26 @@ router = APIRouter(tags=["gocryptfs"])
     response_model=GocryptfsRevealResponse,
     status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_gocryptfs(require_mountpoint=None))],
-    summary="Reveal gocryptfs passphrase.",
+    summary="Reveal storage secrets.",
 )
 async def gocryptfs_reveal_router(
     data: GocryptfsRevealRequest,
 ) -> GocryptfsRevealResponse:
     """
     Decrypts the stored gocryptfs passphrase with the provided master
-    password and returns it in the response body.
+    password and returns it together with the VersityGW root credentials.
 
-    `GOCRYPTFS_REVEALED` — hook executed after the gocryptfs passphrase
-    is successfully revealed.
+    `GOCRYPTFS_REVEALED` — hook executed after the storage secrets are
+    successfully revealed.
     """
-    passphrase = await gocryptfs_reveal(
-        master_password=data.master_password,
+    passphrase, versity_access_key, versity_secret_key = (
+        await gocryptfs_reveal(
+            master_password=data.master_password,
+        )
     )
+
     return GocryptfsRevealResponse(
         gocryptfs_passphrase=passphrase,
+        versity_access_key=versity_access_key,
+        versity_secret_key=versity_secret_key,
     )
