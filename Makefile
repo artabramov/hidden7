@@ -3,7 +3,6 @@
 -include .env
 
 FORCE ?= 0
-PORT ?= 80
 VOLUME_SECRETS ?= /mnt/hidden-secrets
 
 install:
@@ -22,7 +21,7 @@ install:
 	--cap-add SYS_ADMIN \
 	--device /dev/fuse \
 	--security-opt apparmor:unconfined \
-	-p $(PORT):80 \
+	-p $(UVICORN_PORT):$(UVICORN_PORT) \
 	-p $(VERSITY_PORT):$(VERSITY_PORT) \
 	-p $(VERSITY_WEBGUI_PORT):$(VERSITY_WEBGUI_PORT) \
 	-v hidden-cipherdir:$(INSTALL_CIPHERDIR) \
