@@ -4,7 +4,10 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
-from app.schemas.gocryptfs_init import GocryptfsInitRequest
+from app.schemas.gocryptfs_init import (
+    GocryptfsInitRequest,
+    GocryptfsInitResponse,
+)
 from app.services.gocryptfs_init import gocryptfs_init
 
 router = APIRouter(tags=["gocryptfs"])
@@ -28,7 +31,8 @@ router = APIRouter(tags=["gocryptfs"])
             ),
         },
     },
-    status_code=status.HTTP_204_NO_CONTENT,
+    response_model=GocryptfsInitResponse,
+    status_code=status.HTTP_200_OK,
     dependencies=[Depends(require_gocryptfs(
         require_cipherdir=False,
         require_mountpoint=False,
@@ -43,7 +47,7 @@ async def gocryptfs_init_router(
     Initializes encrypted application storage. It generates a strong
     random gocryptfs passphrase, encrypts it with the provided master
     password, and initializes the cipherdir. It also creates internal
-    application keys used for symmetric encryption.
+    application keys and VersityGW root credentials.
 
     This endpoint is intended for one-time initialization immediately
     after installation.
@@ -51,5 +55,11 @@ async def gocryptfs_init_router(
     `GOCRYPTFS_INITIALIZED` — hook executed after the gocryptfs
     cipherdir is successfully initialized.
     """
-    await gocryptfs_init(data.master_password)
-    return Response(status_code=status.HTTP_204_NO_CONTENT)
+    access_key, secret_key = await gocryptfs_init(
+        data.master_password,
+    )
+
+    return GocryptfsInitResponse(
+        access_key=access_key,
+        secret_key=secret_key,
+    )

@@ -26,3 +26,22 @@ class GocryptfsInitRequest(BaseModel):
     @classmethod
     def validate_master_password_field(cls, value: str) -> str:
         return validate_master_password(value)
+
+
+class GocryptfsInitResponse(BaseModel):
+    """
+    Response schema containing the generated VersityGW root
+    credentials.
+    """
+
+    model_config = ConfigDict(
+        extra="forbid",
+    )
+
+    access_key: str = Field(
+        description="VersityGW root access key.",
+    )
+
+    secret_key: str = Field(
+        description="VersityGW root secret key.",
+    )

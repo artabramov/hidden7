@@ -44,7 +44,7 @@ async def is_versity_created(
 async def versity_create(
     access_key_path: str,
     secret_key_path: str,
-) -> None:
+) -> tuple[str, str]:
     """
     Generate and store VersityGW root credentials.
     """
@@ -60,6 +60,8 @@ async def versity_create(
         secret_key_path,
         secret_key.encode("utf-8"),
     )
+
+    return access_key, secret_key
 
 
 async def versity_start(

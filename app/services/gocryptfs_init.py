@@ -29,7 +29,7 @@ log = logging.getLogger(__name__)
 # pass the outer gates; the second may then overwrite secrets after
 # the first has already completed successfully.
 
-async def gocryptfs_init(master_password: str) -> None:
+async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """
     Initialize encrypted storage by generating and encrypting a random
     gocryptfs passphrase, initializing the cipherdir, creating the
@@ -85,7 +85,7 @@ async def gocryptfs_init(master_password: str) -> None:
                 fernet_key.encode("utf-8")
             )
 
-            await versity_create(
+            access_key, secret_key = await versity_create(
                 config.VERSITY_ACCESS_KEY_PATH,
                 config.VERSITY_SECRET_KEY_PATH,
             )
@@ -110,3 +110,5 @@ async def gocryptfs_init(master_password: str) -> None:
             await delete(config.VERSITY_SECRET_KEY_PATH)
 
             raise
+
+    return access_key, secret_key
