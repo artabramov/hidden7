@@ -39,7 +39,10 @@ async def gocryptfs_reset(master_password: str) -> None:
             log.warning("msg=passphrase_invalid")
             raise UnauthorizedError
 
-        await versity_stop()
+        try:
+            await versity_stop()
+        except Exception:
+            pass
 
         if await ismount(config.INSTALL_MOUNTPOINT):
             await cipherdir_unmount(

@@ -83,6 +83,10 @@ async def gocryptfs_mount(master_password: str) -> None:
 
             try:
                 await versity_stop()
+            except Exception:
+                pass
+
+            try:
                 await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
                 log.warning("msg=gocryptfs_mount_rollback_completed")
 

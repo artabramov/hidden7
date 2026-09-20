@@ -31,22 +31,19 @@ async def run_watchdog() -> None:
 
     if not await isdir(config.INSTALL_SECRETS):
         log.warning("msg=watchdog_secrets_missing")
-        await versity_stop()
-        await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
+        await _emergency_unmount(config.INSTALL_MOUNTPOINT)
         log.info("msg=watchdog_unmount_completed")
         return
 
     if not await isfile(config.GOCRYPTFS_PASSPHRASE_PATH):
         log.warning("msg=watchdog_passphrase_missing")
-        await versity_stop()
-        await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
+        await _emergency_unmount(config.INSTALL_MOUNTPOINT)
         log.info("msg=watchdog_unmount_completed")
         return
 
     if not _is_application_running():
         log.warning("msg=watchdog_application_missing")
-        await versity_stop()
-        await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
+        await _emergency_unmount(config.INSTALL_MOUNTPOINT)
         log.info("msg=watchdog_unmount_completed")
 
 
@@ -78,6 +75,20 @@ def _is_application_running() -> bool:
             return True
 
     return False
+
+
+async def _emergency_unmount(mountpoint: str) -> None:
+    """
+    Stop VersityGW and unmount the encrypted filesystem.
+    """
+    try:
+        await versity_stop()
+    except Exception:
+        pass
+
+    await cipherdir_unmount(mountpoint)
+
+    log.info("msg=watchdog_unmount_completed")
 
 
 if __name__ == "__main__":
