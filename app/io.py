@@ -86,7 +86,12 @@ async def rmtree(path: str) -> None:
         return
 
     for name in await listdir(path):
-        await delete(os.path.join(path, name))
+        child = os.path.join(path, name)
+
+        if await isdir(child):
+            await rmtree(child)
+        else:
+            await delete(child)
 
     await rmdir(path)
 
