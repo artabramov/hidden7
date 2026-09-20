@@ -24,11 +24,6 @@ log = logging.getLogger(__name__)
 # encrypted data therefore requires both the passphrase and the master
 # password.
 
-# TODO: Re-check cipherdir/passphrase/fernet/versity under the WRITE
-# lock before creating artifacts. Two concurrent init requests can both
-# pass the outer gates; the second may then overwrite secrets after
-# the first has already completed successfully.
-
 async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """
     Initialize encrypted storage by generating and encrypting a random
@@ -41,26 +36,26 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """
     config = get_config()
 
-    if await isfile(config.GOCRYPTFS_PASSPHRASE_PATH):
-        log.warning("msg=gocryptfs_passphrase_already_exists")
-        raise BadGatewayError
-
-    if await is_cipherdir_created(config.INSTALL_CIPHERDIR):
-        log.warning("msg=cipherdir_already_exists")
-        raise BadGatewayError
-
-    if await isfile(config.FERNET_ENCRYPTION_KEY_PATH):
-        log.warning("msg=fernet_key_already_exists")
-        raise BadGatewayError
-
-    if await is_versity_created(
-        config.VERSITY_ACCESS_KEY_PATH,
-        config.VERSITY_SECRET_KEY_PATH,
-    ):
-        log.warning("msg=versity_already_exists")
-        raise BadGatewayError
-
     async with locks.lock_directory(config.INSTALL_SECRETS, LockType.WRITE):
+        if await isfile(config.GOCRYPTFS_PASSPHRASE_PATH):
+            log.warning("msg=gocryptfs_passphrase_already_exists")
+            raise BadGatewayError
+
+        if await is_cipherdir_created(config.INSTALL_CIPHERDIR):
+            log.warning("msg=cipherdir_already_exists")
+            raise BadGatewayError
+
+        if await isfile(config.FERNET_ENCRYPTION_KEY_PATH):
+            log.warning("msg=fernet_key_already_exists")
+            raise BadGatewayError
+
+        if await is_versity_created(
+            config.VERSITY_ACCESS_KEY_PATH,
+            config.VERSITY_SECRET_KEY_PATH,
+        ):
+            log.warning("msg=versity_already_exists")
+            raise BadGatewayError
+
         passphrase = generate_random_string(GOCRYPTFS_PASSPHRASE_LENGTH)
         passphrase_encrypted = encrypt_passphrase(
             passphrase.encode("utf-8"),

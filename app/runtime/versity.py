@@ -189,5 +189,13 @@ async def versity_stop() -> None:
     except ProcessLookupError:
         return
 
-    while _get_versity_pid() is not None:
+    deadline = loop.time() + config.VERSITY_STOP_TIMEOUT_SECONDS
+
+    while loop.time() < deadline:
+        if _get_versity_pid() is None:
+            return
+
         await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+
+    log.error("msg=versity_kill_timeout pid=%s", pid)
+    raise InternalServerError

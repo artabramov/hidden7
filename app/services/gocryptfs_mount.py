@@ -8,7 +8,7 @@ from app.errors import UnauthorizedError
 from app.locks import LockType, locks
 from app.io import isdir, mktree, read
 from app.runtime.cipherdir import cipherdir_mount, cipherdir_unmount
-from app.runtime.versity import versity_start
+from app.runtime.versity import versity_start, versity_stop
 from app.security.encryption import decrypt_passphrase
 
 log = logging.getLogger(__name__)
@@ -82,6 +82,7 @@ async def gocryptfs_mount(master_password: str) -> None:
             log.exception("msg=gocryptfs_mount_failed")
 
             try:
+                await versity_stop()
                 await cipherdir_unmount(config.INSTALL_MOUNTPOINT)
                 log.warning("msg=gocryptfs_mount_rollback_completed")
 
