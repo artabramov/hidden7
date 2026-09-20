@@ -103,7 +103,6 @@ async def versity_start(
             data_path,
             env=env,
             stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.PIPE,
         )
 
         try:
@@ -114,13 +113,10 @@ async def versity_start(
         except asyncio.TimeoutError:
             return
 
-        stderr = await process.stderr.read()
-        error = stderr.decode(
-            encoding="utf-8",
-            errors="replace",
-        ).strip() or "unknown error"
-
-        log.error("msg=versity_start_failed error=%s", error)
+        log.error(
+            "msg=versity_start_failed returncode=%s",
+            process.returncode,
+        )
         raise InternalServerError
 
     except InternalServerError:

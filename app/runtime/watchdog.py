@@ -88,8 +88,6 @@ async def _emergency_unmount(mountpoint: str) -> None:
 
     await cipherdir_unmount(mountpoint)
 
-    log.info("msg=watchdog_unmount_completed")
-
 
 if __name__ == "__main__":
     init_logging()
