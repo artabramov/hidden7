@@ -80,12 +80,14 @@ async def versity_start(
     Start VersityGW using the provided root credentials and POSIX
     storage directory.
     """
+    config = get_config()
+
     env = os.environ.copy()
     env["ROOT_ACCESS_KEY"] = access_key
     env["ROOT_SECRET_KEY"] = secret_key
 
     try:
-        await asyncio.create_subprocess_exec(
+        process = await asyncio.create_subprocess_exec(
             "versitygw",
             "--port",
             f"{host}:{port}",
@@ -101,8 +103,29 @@ async def versity_start(
             data_path,
             env=env,
             stdout=asyncio.subprocess.DEVNULL,
-            stderr=asyncio.subprocess.DEVNULL,
+            stderr=asyncio.subprocess.PIPE,
         )
+
+        try:
+            await asyncio.wait_for(
+                process.wait(),
+                timeout=config.VERSITY_START_TIMEOUT_SECONDS,
+            )
+        except asyncio.TimeoutError:
+            return
+
+        stderr = await process.stderr.read()
+        error = stderr.decode(
+            encoding="utf-8",
+            errors="replace",
+        ).strip() or "unknown error"
+
+        log.error("msg=versity_start_failed error=%s", error)
+        raise InternalServerError
+
+    except InternalServerError:
+        raise
+
     except Exception:
         log.exception("msg=versity_start_failed")
         raise InternalServerError
