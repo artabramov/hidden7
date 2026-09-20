@@ -1,7 +1,7 @@
 # app/routers/gocryptfs_init.py
 # SPDX-License-Identifier: GPL-3.0-only
 
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
 from app.schemas.gocryptfs_init import (
@@ -42,7 +42,7 @@ router = APIRouter(tags=["gocryptfs"])
 )
 async def gocryptfs_init_router(
     data: GocryptfsInitRequest,
-) -> Response:
+) -> GocryptfsInitResponse:
     """
     Initializes encrypted application storage. It generates a strong
     random gocryptfs passphrase, encrypts it with the provided master
