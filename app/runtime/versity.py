@@ -6,6 +6,7 @@ import logging
 import os
 import signal
 
+from app.config import get_config
 from app.constants import (
     VERSITY_ACCESS_KEY_LENGTH,
     VERSITY_SECRET_KEY_LENGTH,
@@ -133,8 +134,11 @@ async def is_versity_running() -> bool:
 
 async def versity_stop() -> None:
     """
-    Stop the running VersityGW process.
+    Stop the running VersityGW process, forcing termination if
+    graceful shutdown does not complete within the timeout.
     """
+    config = get_config()
+
     pid = _get_versity_pid()
     if pid is None:
         return
@@ -142,4 +146,23 @@ async def versity_stop() -> None:
     try:
         os.kill(pid, signal.SIGTERM)
     except ProcessLookupError:
-        pass
+        return
+
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + config.VERSITY_STOP_TIMEOUT_SECONDS
+
+    while loop.time() < deadline:
+        if _get_versity_pid() is None:
+            return
+
+        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+
+    log.warning("msg=versity_stop_timeout pid=%s", pid)
+
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        return
+
+    while _get_versity_pid() is not None:
+        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)

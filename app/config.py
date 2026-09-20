@@ -43,6 +43,8 @@ class Config(BaseSettings):
     VERSITY_WEBGUI_PORT: int
     VERSITY_WEBGUI_GATEWAY: str
     VERSITY_WEBGUI_CORS_ALLOW_ORIGIN: str
+    VERSITY_STOP_TIMEOUT_SECONDS: int
+    VERSITY_STOP_POLL_INTERVAL_SECONDS: float
 
     @cached_property
     def GOCRYPTFS_PASSPHRASE_PATH(self) -> str:
