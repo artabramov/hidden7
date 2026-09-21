@@ -23,8 +23,9 @@ async def is_versity_created(
     secret_key_path: str,
 ) -> bool:
     """
-    Checks whether VersityGW credentials have been created by
-    verifying the presence and readability of both credential files.
+    Return whether VersityGW credentials have been created by verifying
+    that both credential files exist, can be read, and contain non-empty
+    values.
     """
     if not await isfile(access_key_path):
         return False
@@ -46,7 +47,8 @@ async def versity_create(
     secret_key_path: str,
 ) -> tuple[str, str]:
     """
-    Generate and store VersityGW root credentials.
+    Generate random VersityGW root credentials, store them in the
+    specified credential files, and return the generated values.
     """
     access_key = generate_random_string(VERSITY_ACCESS_KEY_LENGTH)
     secret_key = generate_random_string(VERSITY_SECRET_KEY_LENGTH)
@@ -77,8 +79,10 @@ async def versity_start(
     secret_key: str,
 ) -> None:
     """
-    Start VersityGW using the provided root credentials and POSIX
-    storage directory.
+    Start VersityGW with the provided root credentials, POSIX storage,
+    and IAM directories. Wait for the configured startup timeout and
+    consider the startup successful if the process remains running for
+    that period.
     """
     config = get_config()
 
@@ -128,6 +132,11 @@ async def versity_start(
 
 
 def _get_versity_pid() -> int | None:
+    """
+    Return the PID of the running VersityGW process by scanning /proc
+    for a process whose command name is "versitygw". Return None if no
+    matching process is found.
+    """
     for entry in os.scandir("/proc"):
         if not entry.name.isdigit():
             continue
@@ -155,8 +164,10 @@ async def is_versity_running() -> bool:
 
 async def versity_stop() -> None:
     """
-    Stop the running VersityGW process, forcing termination if
-    graceful shutdown does not complete within the timeout.
+    Stop the running VersityGW process by first requesting graceful
+    termination with SIGTERM. If the process remains running after the
+    configured timeout, force termination with SIGKILL and raise an
+    error if the process still does not exit.
     """
     config = get_config()
 

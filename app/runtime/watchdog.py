@@ -17,10 +17,11 @@ log = logging.getLogger(__name__)
 
 async def run_watchdog() -> None:
     """
-    If the mountpoint is mounted, the watchdog triggers an emergency
-    unmount when critical conditions are violated (missing secrets,
-    missing passphrase, or application not running). If the mountpoint
-    is not mounted, the watchdog ensures that VersityGW is stopped.
+    Run the watchdog to monitor the encrypted storage state. If the
+    mountpoint is mounted, the watchdog triggers an emergency unmount
+    when critical conditions are violated (missing secrets, missing
+    passphrase, or application not running). If the mountpoint is not
+    mounted, the watchdog ensures that VersityGW is stopped.
     """
     config = get_config()
     Path(WATCHDOG_HEARTBEAT_PATH).touch()
@@ -47,8 +48,9 @@ async def run_watchdog() -> None:
 
 def _is_application_running() -> bool:
     """
-    Return whether a process matching the expected Uvicorn application
-    command line is present in /proc.
+    Return whether the expected Uvicorn application process is running
+    by scanning process command lines in /proc for both Uvicorn and
+    app.main:app.
     """
     proc_path = Path("/proc")
 
@@ -77,7 +79,9 @@ def _is_application_running() -> bool:
 
 async def _emergency_unmount(mountpoint: str) -> None:
     """
-    Stop VersityGW and unmount the encrypted filesystem.
+    Stop VersityGW and unmount the encrypted filesystem. If VersityGW
+    cannot be stopped, continue with the unmount to ensure that the
+    decrypted filesystem is not left mounted.
     """
     try:
         await versity_stop()
