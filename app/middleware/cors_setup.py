@@ -1,5 +1,5 @@
 # app/middleware/cors_setup.py
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware

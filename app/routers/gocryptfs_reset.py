@@ -1,5 +1,5 @@
 # app/routers/gocryptfs_reset.py
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 from fastapi import APIRouter, Depends, Response, status
 

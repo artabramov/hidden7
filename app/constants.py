@@ -1,5 +1,5 @@
 # app/constants.py
-# SPDX-License-Identifier: GPL-3.0-only
+# SPDX-License-Identifier: Apache-2.0
 
 HIDDEN_TITLE = "Hidden — S3-compatible storage secured by gocryptfs"
 
