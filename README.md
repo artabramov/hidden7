@@ -27,6 +27,9 @@ For emergency recovery, the `cipherdir` can be mounted directly with
 `gocryptfs` using the decrypted passphrase. The data is not locked into
 the application and can be accessed or exported independently.
 
+![version](https://img.shields.io/badge/version-0.6.0-2f81f7)
+[![license](https://img.shields.io/badge/license-Apache--2.0-2f81f7)](./LICENSE)
+
 ## How it works
 
 S3 data and IAM state reside within the encrypted filesystem. Decrypted
@@ -80,17 +83,78 @@ Hidden is designed for scenarios where data must remain protected
 independently of the storage service and underlying infrastructure.
 Typical use cases include:
 
-**Private storage** — storage for sensitive data where encryption and
+* **Private storage** — storage for sensitive data where encryption and
 access to decrypted contents remain under the owner's control.
 
-**Internal storage** — S3-compatible storage for applications, services,
+* **Internal storage** — S3-compatible storage for applications, services,
 and teams running on privately managed infrastructure.
 
-**Isolated environments** — local S3 storage for disconnected,
+* **Isolated environments** — local S3 storage for disconnected,
 restricted, or otherwise self-contained infrastructure.
 
-**Backup and archival storage** — encrypted S3 storage for backups,
+* **Backup and archival storage** — encrypted S3 storage for backups,
 snapshots, exports, and long-term data retention.
+
+## What is protected
+
+The protection model covers scenarios where stored data, storage volumes,
+or the host system become physically accessible or exposed. Encryption
+remains effective independently of the S3 layer and application-level
+access controls.
+
+* **Stolen host or unauthorized disk access.** The `cipherdir` contains
+encrypted data only. Physical access to the host or storage, raw disk
+access, filesystem recovery tools, or direct inspection of the encrypted
+volume do not expose plaintext file contents or names.
+
+* **Leaked volumes.** The `cipherdir` and `secrets` volumes are
+protected independently. A copied or exposed `cipherdir` remains
+encrypted without the corresponding `gocryptfs` passphrase, while the
+passphrase stored in `secrets` is itself encrypted and cannot be used
+without the `master password`. Even possession of both volumes is
+insufficient to access the stored data without the `master password`.
+
+* **Unexpected runtime conditions.** A `watchdog` monitors the
+application process, the `secrets` volume, and the encrypted storage.
+If a critical condition is detected, it unmounts the decrypted
+filesystem and stops the S3 gateway.
+
+* **Container loss or replacement.** Persistent data and secrets are
+stored outside the application container, allowing the container to be
+replaced without affecting the stored data. The `cipherdir` can also be
+mounted directly with `gocryptfs` using the decrypted passphrase,
+providing access to its POSIX files and directories independently
+of the application.
+
+## What is not protected against
+
+The protection model does not cover access to decrypted data within a
+compromised runtime environment. Some filesystem metadata also remains
+visible as part of the standard gocryptfs protection model.
+
+* **Runtime host or container compromise.** While the filesystem is
+mounted, decrypted data exists inside the container. An attacker with
+sufficient privileges on the host or inside the container may be able
+to access the decrypted filesystem directly.
+
+* **Filesystem metadata.** Following the standard `gocryptfs` protection
+model, filesystem metadata such as timestamps and approximate file sizes
+remains available to the underlying filesystem, while file contents and
+plaintext file and directory names remain encrypted.
+
+## Cautions
+
+The encryption model relies on the integrity of the storage volumes and
+availability of the required credentials. Loss or manual modification of
+critical data may make the storage inaccessible or unrecoverable.
+
+* **Forgotten master password.** The `master password` is not stored
+anywhere. If lost, the encrypted passphrase cannot be unlocked and the
+storage cannot be recovered.
+
+* **Direct modification of volumes.** The `cipherdir` and `secrets`
+volumes should not be modified manually. Direct changes may make the
+storage inconsistent or unrecoverable.
 
 ## Integration and migration
 
@@ -107,3 +171,15 @@ the application.
 The S3 interface can be used with existing backup software, applications,
 scripts, and other S3-compatible tools, allowing the storage to be
 integrated into existing workflows.
+
+## License
+
+This project is licensed under the **Apache License 2.0**
+(`Apache-2.0`).
+
+You may use, modify, and distribute this software in accordance with
+the terms of the Apache License 2.0.
+
+See [LICENSE](./LICENSE) for the full license text.
+
+Copyright (c) 2026 Artem Abramov
