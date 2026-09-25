@@ -30,6 +30,14 @@ the application and can be accessed or exported independently.
 ![version](https://img.shields.io/badge/version-0.6.0-2f81f7)
 [![license](https://img.shields.io/badge/license-Apache--2.0-2f81f7)](./LICENSE)
 
+If you like it, star it ⭐ — it helps discoverability. Thank you!
+
+## References
+
+- Encrypted filesystem: [gocryptfs](https://github.com/rfjakob/gocryptfs)
+- S3-compatible gateway: [VersityGW](https://github.com/versity/versitygw)
+- Architectural decisions: [ADR.md](./ADR.md)
+
 ## How it works
 
 S3 data and IAM state reside within the encrypted filesystem. Decrypted
