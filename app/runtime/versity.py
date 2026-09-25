@@ -80,9 +80,8 @@ async def versity_start(
 ) -> None:
     """
     Start VersityGW with the provided root credentials, POSIX storage,
-    and IAM directories. Wait for the configured startup timeout and
-    consider the startup successful if the process remains running for
-    that period.
+    and IAM directories. Poll until the process is observed running or
+    the configured startup timeout expires.
     """
     config = get_config()
 
@@ -108,26 +107,35 @@ async def versity_start(
             env=env,
             stdout=asyncio.subprocess.DEVNULL,
         )
+    except Exception:
+        log.exception("msg=versity_start_failed")
+        raise InternalServerError
 
-        try:
-            await asyncio.wait_for(
-                process.wait(),
-                timeout=config.VERSITY_START_TIMEOUT_SECONDS,
+    loop = asyncio.get_running_loop()
+    deadline = loop.time() + config.VERSITY_START_TIMEOUT_SECONDS
+
+    while loop.time() < deadline:
+        if process.returncode is not None:
+            log.error(
+                "msg=versity_start_failed returncode=%s",
+                process.returncode,
             )
-        except asyncio.TimeoutError:
+            raise InternalServerError
+
+        if await is_versity_running():
             return
 
+        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+
+    if process.returncode is not None:
         log.error(
             "msg=versity_start_failed returncode=%s",
             process.returncode,
         )
         raise InternalServerError
 
-    except InternalServerError:
-        raise
-
-    except Exception:
-        log.exception("msg=versity_start_failed")
+    if not await is_versity_running():
+        log.error("msg=versity_start_failed process_not_running")
         raise InternalServerError
 
 
