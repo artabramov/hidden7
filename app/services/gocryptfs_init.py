@@ -16,13 +16,26 @@ from app.runtime.versity import versity_create, is_versity_created
 
 log = logging.getLogger(__name__)
 
-
-# NOTE: Gocryptfs passphrase is protected by master password.
+# NOTE (ADR-04): gocryptfs passphrase is protected by master password.
 # It is encrypted with a master password and is never persisted in
 # plaintext on disk. The passphrase exists in plaintext only in memory
 # during mount and is discarded immediately afterwards. Access to the
 # encrypted data therefore requires both the passphrase and the master
 # password.
+
+# NOTE (ADR-05): gocryptfs passphrase is provided throught tmpfs.
+# Command-line arguments and stdin are avoided to prevent exposure
+# in process listings (argv) and to bypass TTY-based input behavior.
+# The passphrase is written to a temporary file in tmpfs (/dev/shm)
+# and passed using -passfile. The file exists only for the duration
+# of the mount operation and is removed immediately after use.
+
+# NOTE (ADR-06): Cipherdir initialization is a one-time operation.
+# The service creates the gocryptfs filesystem and all related secrets
+# together. This operation is not transactional, so on failure the
+# service performs best-effort cleanup of artifacts created during
+# the current attempt.
+
 
 async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """

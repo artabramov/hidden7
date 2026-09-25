@@ -1,6 +1,14 @@
 # app/constants.py
 # SPDX-License-Identifier: Apache-2.0
 
+# NOTE (ADR-01): Naming and code style conventions follow PEP 8.
+# 1. Code style follows PEP 8 with line length limits: 79 characters
+#    for code and 72 characters for comments, enforced with flake8.
+# 2. File names use `<resource>_<action>` to group related logic by
+#    domain resource and improve locality in listings.
+# 3. Function names use `<action>_<resource>` to preserve natural
+#    reading order and improve readability.
+
 HIDDEN_TITLE = "Hidden — S3-compatible storage secured by gocryptfs"
 
 GOCRYPTFS_PASSPHRASE_LENGTH = 80
