@@ -17,20 +17,16 @@ def require_gocryptfs(
     require_passphrase: bool | None = True,
 ):
     """
-    FastAPI dependency factory to check gocryptfs preconditions.
-
-    Each resource (cipherdir, mountpoint, and passphrase) can be
-    required, forbidden, or ignored by passing True, False, or
-    None respectively.
+    Create a FastAPI dependency that validates the required, forbidden,
+    or ignored state of the gocryptfs cipherdir, mountpoint, and
+    passphrase.
     """
 
     async def check_gocryptfs() -> None:
         """
-        Execute fail-fast validation for gocryptfs paths and states.
-
-        Raises:
-            ServiceUnavailableError: Required resource is missing (503).
-            BadGatewayError: Resource exists when it should not (502).
+        Validate the configured gocryptfs cipherdir, mountpoint, and
+        passphrase states and reject the request if any required or
+        forbidden condition is not satisfied.
         """
         config = get_config()
 

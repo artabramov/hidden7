@@ -66,10 +66,10 @@ gateway.
 │ (gocryptfs mountpoint)  │                External
 └─────────────────────────┘                Volumes
              │
-┌─────────────────────────┐       ┌─────────────────────────┐
-│ Watchdog                │-------│ Detachable secrets      │
-│ (mount supervisor)      │       │ (gocryptfs passphrase)  │
-└─────────────────────────┘       └─────────────────────────┘
+┌─────────────────────────┐       ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
+│ Watchdog                │-------┃ Detachable secrets      ┃
+│ (mount supervisor)      │       ┃ (gocryptfs passphrase)  ┃
+└─────────────────────────┘       ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛
              │
 ┌─────────────────────────┐       ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓
 │ FUSE layer              │-------┃ Encrypted storage       ┃
@@ -152,7 +152,7 @@ critical data may make the storage inaccessible or unrecoverable.
 anywhere. If lost, the encrypted passphrase cannot be unlocked and the
 storage cannot be recovered.
 
-* **Direct modification of volumes.** The `cipherdir` and `secrets`
+* **Manual modification of volumes.** The `cipherdir` and `secrets`
 volumes should not be modified manually. Direct changes may make the
 storage inconsistent or unrecoverable.
 

@@ -13,8 +13,8 @@ logger = logging.getLogger(__name__)
 
 async def request_logging_middleware(request: Request, call_next):
     """
-    Emits logs for request start, completion and failure,
-    including basic metadata and elapsed time.
+    Log request start, completion, and failure events with basic request
+    metadata and elapsed processing time.
     """
     client = request.client.host if request.client else None
     logger.info(

@@ -10,14 +10,14 @@ from app.context import get_context_var
 
 class RequestContextFilter(logging.Filter):
     """
-    Inject request-scoped context values into log records.
-    Adds fields expected by the log format (e.g. request_uuid).
+    Enrich log records with request-scoped context values
+    used by the configured log format.
     """
 
     def filter(self, record: logging.LogRecord) -> bool:
         """
-        Populate the log record with values from the current context.
-        Always returns True to allow the record to be processed.
+        Populate the log record with the current request identifier
+        and allow the record to be processed.
         """
         record.request_uuid = get_context_var("request_uuid", "-")
         return True
@@ -25,9 +25,9 @@ class RequestContextFilter(logging.Filter):
 
 def init_logging() -> None:
     """
-    Initialize root logger with configured level, format and handlers.
-    Replaces existing handlers and attaches a stream handler with
-    request context enrichment.
+    Configure the root logger with the configured log level and format,
+    replacing existing handlers with a standard output handler enriched
+    with request context.
     """
     config = get_config()
 

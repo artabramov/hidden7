@@ -9,8 +9,8 @@ _ALPHABET = string.ascii_letters + string.digits
 
 def generate_random_string(length: int) -> str:
     """
-    Generate a random string of the given length,
-    using the default alphabet.
+    Generate a cryptographically secure random string of the specified
+    positive length using ASCII letters and digits.
     """
     if length < 1:
         raise ValueError("length must be positive")

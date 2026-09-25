@@ -9,11 +9,8 @@ from app.config import get_config
 
 def cors_setup_middleware(app: FastAPI) -> None:
     """
-    Configure Cross-Origin Resource Sharing (CORS).
-
-    Browsers enforce same-origin restrictions for cross-origin requests.
-    Configured origins receive CORS response headers allowing access to
-    the API across different origins.
+    Configure CORS middleware with the allowed origins and preflight
+    cache duration defined in the application configuration.
     """
     config = get_config()
     allow_origins = [

@@ -24,6 +24,10 @@ _SCRYPT_P: int = 1
 
 
 def _derive_key(password: bytes, salt: bytes) -> bytes:
+    """
+    Derive a fixed-length encryption key from the provided
+    password and salt using scrypt.
+    """
     kdf = Scrypt(
         salt=salt,
         length=_KEY_LEN,
@@ -35,7 +39,11 @@ def _derive_key(password: bytes, salt: bytes) -> bytes:
 
 
 def encrypt_passphrase(plaintext: bytes, password: bytes) -> bytes:
-    """Encrypt plaintext with password; return an opaque blob."""
+    """
+    Encrypt a non-empty passphrase with a password using an
+    scrypt-derived key and AES-GCM, returning a versioned binary
+    blob containing the salt and nonce.
+    """
     if not plaintext:
         raise ValueError("plaintext must not be empty")
     if not password:
@@ -55,7 +63,11 @@ def encrypt_passphrase(plaintext: bytes, password: bytes) -> bytes:
 
 
 def decrypt_passphrase(ciphertext: bytes, password: bytes) -> bytes:
-    """Decrypt a blob produced by encrypt function."""
+    """
+    Validate and decrypt a versioned passphrase blob using the
+    provided password, rejecting invalid, unsupported, corrupted,
+    or undecryptable data.
+    """
     if not ciphertext:
         raise ValueError("ciphertext must not be empty")
     if not password:
@@ -81,11 +93,18 @@ def decrypt_passphrase(ciphertext: bytes, password: bytes) -> bytes:
 
 
 def generate_fernet_key() -> str:
+    """
+    Generate a new Fernet encryption key and return it as a string.
+    """
     return Fernet.generate_key().decode()
 
 
 @lru_cache(maxsize=1)
 def get_fernet() -> Fernet:
+    """
+    Load the configured Fernet encryption key from disk and return
+    a cached Fernet instance.
+    """
     config = get_config()
     with open(config.FERNET_ENCRYPTION_KEY_PATH, "r", encoding="utf-8") as f:
         key = f.read().strip()
@@ -93,8 +112,16 @@ def get_fernet() -> Fernet:
 
 
 def encrypt_string(value: str) -> str:
+    """
+    Encrypt a string with the configured Fernet instance and return
+    the encoded token as a string.
+    """
     return get_fernet().encrypt(value.encode()).decode()
 
 
 def decrypt_string(value: str) -> str:
+    """
+    Decrypt a Fernet token with the configured Fernet instance and
+    return the plaintext string.
+    """
     return get_fernet().decrypt(value.encode()).decode()

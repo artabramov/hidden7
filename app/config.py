@@ -18,10 +18,8 @@ from app.constants import (
 
 class Config(BaseSettings):
     """
-    Centralized runtime configuration.
-
-    Combines environment variables, application constants,
-    and derived values into a single configuration object.
+    Combine environment-based settings and derived filesystem
+    paths into the application runtime configuration.
     """
 
     INSTALL_SOURCE_CODE: str
@@ -96,4 +94,8 @@ class Config(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_config() -> Config:
+    """
+    Create and return a cached application configuration instance
+    populated from the environment.
+    """
     return Config()
