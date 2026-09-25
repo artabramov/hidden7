@@ -5,7 +5,7 @@ import logging
 
 from app.config import get_config
 from app.errors import UnauthorizedError
-from app.locks import LockType, locks
+from app.locks import lock_manager
 from app.io import isdir, mktree, read
 from app.runtime.cipherdir import cipherdir_mount, cipherdir_unmount
 from app.runtime.versity import versity_start, versity_stop
@@ -25,10 +25,7 @@ async def gocryptfs_mount(master_password: str) -> None:
     """
     config = get_config()
 
-    async with locks.lock_directory(
-        config.INSTALL_SECRETS,
-        LockType.WRITE,
-    ):
+    async with lock_manager.lock():
         passphrase_encrypted = await read(config.GOCRYPTFS_PASSPHRASE_PATH)
 
         try:

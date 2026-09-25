@@ -5,7 +5,7 @@ import logging
 
 from app.config import get_config
 from app.errors import UnauthorizedError
-from app.locks import LockType, locks
+from app.locks import lock_manager
 from app.io import read, write
 from app.security.encryption import decrypt_passphrase, encrypt_passphrase
 
@@ -23,10 +23,7 @@ async def gocryptfs_rotate(
     """
     config = get_config()
 
-    async with locks.lock_directory(
-        config.INSTALL_SECRETS,
-        LockType.WRITE,
-    ):
+    async with lock_manager.lock():
         passphrase_encrypted = await read(config.GOCRYPTFS_PASSPHRASE_PATH)
 
         try:

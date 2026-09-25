@@ -7,7 +7,7 @@ import os
 from app.config import get_config
 from app.constants import GOCRYPTFS_PASSPHRASE_LENGTH
 from app.errors import BadGatewayError
-from app.locks import LockType, locks
+from app.locks import lock_manager
 from app.io import delete, isfile, write
 from app.security.encryption import encrypt_passphrase, generate_fernet_key
 from app.security.randoms import generate_random_string
@@ -36,7 +36,7 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """
     config = get_config()
 
-    async with locks.lock_directory(config.INSTALL_SECRETS, LockType.WRITE):
+    async with lock_manager.lock():
         if await isfile(config.GOCRYPTFS_PASSPHRASE_PATH):
             log.warning("msg=gocryptfs_passphrase_already_exists")
             raise BadGatewayError

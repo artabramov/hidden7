@@ -183,3 +183,28 @@ the terms of the Apache License 2.0.
 See [LICENSE](./LICENSE) for the full license text.
 
 Copyright (c) 2026 Artem Abramov
+
+
+```text
+app/
+├── main.py              # FastAPI, middleware, 7 роутеров
+├── config.py            # pydantic-settings из .env
+├── constants.py
+├── errors.py            # 401/500/502/503 (без S3-ошибок)
+├── io.py                # async FS (aiofiles)
+├── locks.py             # in-process READ/WRITE locks
+├── handlers.py          # exception handlers
+├── dependencies/
+│   └── require_gocryptfs.py
+├── routers/             # 7 эндпоинтов gocryptfs
+├── services/            # бизнес-логика
+├── schemas/             # Pydantic request/response
+├── runtime/
+│   ├── cipherdir.py     # gocryptfs init/mount/unmount
+│   ├── versity.py       # versitygw start/stop/credentials
+│   └── watchdog.py      # emergency unmount
+├── security/
+│   ├── encryption.py    # scrypt+AES-GCM (passphrase), Fernet (заготовка)
+│   └── randoms.py
+└── middleware/          # CORS, logging, security headers, request context
+```
