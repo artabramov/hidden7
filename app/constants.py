@@ -10,8 +10,6 @@ WATCHDOG_HEARTBEAT_PATH = "/tmp/gocryptfs-watchdog.touch"
 
 FERNET_ENCRYPTION_KEY_FILENAME = "fernet_encryption.key"
 
-FILE_CHUNK_SIZE_BYTES = 1024 * 64
-
 VERSITY_ACCESS_KEY_LENGTH = 20
 VERSITY_ACCESS_KEY_FILENAME = "versity_access.key"
 

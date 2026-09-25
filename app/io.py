@@ -4,13 +4,10 @@
 import asyncio
 import os
 import uuid
-from typing import AsyncIterable, AsyncIterator
 
 import aiofiles
 import aiofiles.os
 import aiofiles.ospath
-
-from app.constants import FILE_CHUNK_SIZE_BYTES
 
 
 async def listdir(path: str) -> list[str]:
@@ -69,30 +66,17 @@ async def write(
     data: bytes | bytearray | memoryview,
 ) -> None:
     """
-    Atomically write in-memory bytes to destination. Data is chunked,
-    written to a temporary file, then flushed, fsynced, atomically
-    replaced, and the parent directory is fsynced.
+    Atomically write in-memory bytes to destination. Data is written
+    to a temporary file, flushed, fsynced, atomically replaced, and
+    the parent directory is fsynced.
     """
-    async def data_iter() -> AsyncIterator[bytes]:
-        view = memoryview(data)
-        for offset in range(0, len(view), FILE_CHUNK_SIZE_BYTES):
-            yield bytes(view[offset:offset + FILE_CHUNK_SIZE_BYTES])
-
-    await _atomic_write_stream(data_iter(), destination)
+    await _atomic_write(bytes(data), destination)
 
 
 async def read(path: str) -> bytes:
-    """
-    Read the whole file asynchronously in chunks. Data is read
-    incrementally and accumulated into a single bytes object returned
-    to the caller.
-    """
-    result = bytearray()
-
-    async for chunk in iter_read(path):
-        result.extend(chunk)
-
-    return bytes(result)
+    """Read the whole file asynchronously."""
+    async with aiofiles.open(path, mode="rb") as file:
+        return await file.read()
 
 
 async def delete(path: str) -> None:
@@ -109,40 +93,16 @@ async def delete(path: str) -> None:
     await _fsync_dir(_get_parent_dir(path))
 
 
-async def iter_read(
-    path: str,
-    chunk_size: int = FILE_CHUNK_SIZE_BYTES,
-) -> AsyncIterator[bytes]:
+async def _atomic_write(data: bytes, destination: str) -> None:
     """
-    Read a file asynchronously and yield chunks. The file remains open
-    during iteration and data is yielded without loading the whole file
-    into memory.
-    """
-    async with aiofiles.open(path, mode="rb") as file:
-        while True:
-            chunk = await file.read(chunk_size)
-            if not chunk:
-                break
-            yield chunk
-
-
-async def _atomic_write_stream(
-    data: AsyncIterable[bytes],
-    destination: str,
-) -> None:
-    """
-    Atomically write a byte stream to destination. Data is written to
-    a temporary file, then flushed, fsynced, atomically replaced, and
-    the parent directory is fsynced.
+    Atomically write bytes to destination through a temporary file.
     """
     parent_directory = _get_parent_dir(destination)
     temporary_path = _build_temp_path(destination)
 
     try:
         async with aiofiles.open(temporary_path, mode="wb") as file:
-            async for chunk in data:
-                await file.write(chunk)
-
+            await file.write(data)
             await file.flush()
             await asyncio.to_thread(os.fsync, file.fileno())
 
