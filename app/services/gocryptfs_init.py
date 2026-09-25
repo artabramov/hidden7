@@ -17,7 +17,7 @@ from app.runtime.versity import versity_create, is_versity_created
 log = logging.getLogger(__name__)
 
 
-# NOTE (ADR-09): Gocryptfs passphrase is protected by master password.
+# NOTE: Gocryptfs passphrase is protected by master password.
 # It is encrypted with a master password and is never persisted in
 # plaintext on disk. The passphrase exists in plaintext only in memory
 # during mount and is discarded immediately afterwards. Access to the

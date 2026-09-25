@@ -204,7 +204,7 @@ app/
 │   ├── versity.py       # versitygw start/stop/credentials
 │   └── watchdog.py      # emergency unmount
 ├── security/
-│   ├── encryption.py    # scrypt+AES-GCM (passphrase), Fernet (заготовка)
+│   ├── encryption.py    # scrypt+AES-GCM (passphrase encryption)
 │   └── randoms.py
 └── middleware/          # CORS, logging, security headers, request context
 ```

@@ -46,8 +46,8 @@ async def gocryptfs_init_router(
     """
     Initializes encrypted application storage. It generates a strong
     random gocryptfs passphrase, encrypts it with the provided master
-    password, and initializes the cipherdir. It also creates internal
-    application keys and VersityGW root credentials.
+    password, and initializes the cipherdir. It also creates VersityGW
+    root credentials.
 
     This endpoint is intended for one-time initialization immediately
     after installation.
