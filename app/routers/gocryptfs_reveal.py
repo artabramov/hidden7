@@ -48,9 +48,6 @@ async def gocryptfs_reveal_router(
     """
     Decrypts the stored gocryptfs passphrase with the provided master
     password and returns it together with the VersityGW root credentials.
-
-    `GOCRYPTFS_REVEALED` — hook executed after the storage secrets are
-    successfully revealed.
     """
     passphrase, versity_access_key, versity_secret_key = (
         await gocryptfs_reveal(

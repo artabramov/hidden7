@@ -51,9 +51,6 @@ async def gocryptfs_init_router(
 
     This endpoint is intended for one-time initialization immediately
     after installation.
-
-    `GOCRYPTFS_INITIALIZED` — hook executed after the gocryptfs
-    cipherdir is successfully initialized.
     """
     access_key, secret_key = await gocryptfs_init(
         data.master_password,

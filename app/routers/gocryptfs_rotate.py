@@ -45,9 +45,6 @@ async def gocryptfs_rotate_router(
     Rotates the master password that protects the stored gocryptfs
     passphrase. It decrypts the passphrase with the current password
     and encrypts it again with the new password.
-
-    `GOCRYPTFS_ROTATED` — hook executed after the master password
-    is successfully rotated.
     """
     await gocryptfs_rotate(
         current_master_password=data.current_master_password,
