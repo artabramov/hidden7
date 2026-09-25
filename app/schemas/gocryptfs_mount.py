@@ -3,11 +3,15 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.pydantic.master_password import MASTER_PASSWORD_AUTH_DESCRIPTION
+
 
 class GocryptfsMountRequest(BaseModel):
     """
-    Request schema for mounting the storage mountpoint requiring
-    the master password for decryption.
+    Request schema for mounting encrypted storage.
+
+    Authenticates with the existing master password; composition is
+    not validated.
     """
 
     model_config = ConfigDict(
@@ -15,5 +19,5 @@ class GocryptfsMountRequest(BaseModel):
     )
 
     master_password: str = Field(
-        description="Master password used to mount the cipherdir.",
+        description=MASTER_PASSWORD_AUTH_DESCRIPTION,
     )

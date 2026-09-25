@@ -3,11 +3,15 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.pydantic.master_password import MASTER_PASSWORD_AUTH_DESCRIPTION
+
 
 class GocryptfsResetRequest(BaseModel):
     """
-    Request schema for resetting the encrypted storage requiring
-    the master password for authorization.
+    Request schema for resetting encrypted storage.
+
+    Authenticates with the existing master password; composition is
+    not validated.
     """
 
     model_config = ConfigDict(
@@ -15,5 +19,5 @@ class GocryptfsResetRequest(BaseModel):
     )
 
     master_password: str = Field(
-        description="Master password used to authorize storage reset.",
+        description=MASTER_PASSWORD_AUTH_DESCRIPTION,
     )

@@ -3,13 +3,19 @@
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.pydantic.master_password import validate_master_password
+from app.pydantic.master_password import (
+    MASTER_PASSWORD_AUTH_DESCRIPTION,
+    MASTER_PASSWORD_SET_DESCRIPTION,
+    validate_master_password,
+)
 
 
 class GocryptfsRotateRequest(BaseModel):
     """
-    Request schema for changing the encrypted storage master password
-    with validation of the new password strength and length.
+    Request schema for changing the master password.
+
+    Composition validation applies only to the new password, not the
+    current one used for authentication.
     """
 
     model_config = ConfigDict(
@@ -17,13 +23,13 @@ class GocryptfsRotateRequest(BaseModel):
     )
 
     current_master_password: str = Field(
-        description="Current master password used for authentication.",
+        description=MASTER_PASSWORD_AUTH_DESCRIPTION,
     )
 
     changed_master_password: str = Field(
         min_length=16,
         max_length=1024,
-        description="New master password to replace the current one.",
+        description=MASTER_PASSWORD_SET_DESCRIPTION,
     )
 
     @field_validator("changed_master_password")

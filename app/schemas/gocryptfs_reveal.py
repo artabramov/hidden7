@@ -3,11 +3,15 @@
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from app.pydantic.master_password import MASTER_PASSWORD_AUTH_DESCRIPTION
+
 
 class GocryptfsRevealRequest(BaseModel):
     """
-    Request schema for revealing the stored gocryptfs passphrase
-    with the master password.
+    Request schema for revealing stored secrets.
+
+    Authenticates with the existing master password; composition is
+    not validated.
     """
 
     model_config = ConfigDict(
@@ -15,7 +19,7 @@ class GocryptfsRevealRequest(BaseModel):
     )
 
     master_password: str = Field(
-        description="Master password used to decrypt the passphrase.",
+        description=MASTER_PASSWORD_AUTH_DESCRIPTION,
     )
 
 

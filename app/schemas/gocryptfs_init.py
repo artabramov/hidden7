@@ -3,13 +3,17 @@
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
-from app.pydantic.master_password import validate_master_password
+from app.pydantic.master_password import (
+    MASTER_PASSWORD_SET_DESCRIPTION,
+    validate_master_password,
+)
 
 
 class GocryptfsInitRequest(BaseModel):
     """
-    Request schema for creating the encrypted storage requiring
-    a master password.
+    Request schema for creating encrypted storage.
+
+    Sets the master password and applies composition validation.
     """
 
     model_config = ConfigDict(
@@ -19,7 +23,7 @@ class GocryptfsInitRequest(BaseModel):
     master_password: str = Field(
         min_length=16,
         max_length=1024,
-        description="Master password used to initialize the cipherdir.",
+        description=MASTER_PASSWORD_SET_DESCRIPTION,
     )
 
     @field_validator("master_password")
