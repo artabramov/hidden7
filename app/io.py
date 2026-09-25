@@ -3,7 +3,6 @@
 
 import asyncio
 import os
-import uuid
 
 import aiofiles
 import aiofiles.os
@@ -67,7 +66,29 @@ async def write(
     to a temporary file, flushed, fsynced, atomically replaced, and
     the parent directory is fsynced.
     """
-    await _atomic_write(bytes(data), destination)
+    payload = bytes(data)
+    parent_directory = _get_parent_dir(destination)
+    filename = os.path.basename(destination)
+    temporary_path = os.path.join(
+        parent_directory,
+        f".{filename}.tmp",
+    )
+
+    try:
+        async with aiofiles.open(temporary_path, mode="wb") as file:
+            await file.write(payload)
+            await file.flush()
+            await asyncio.to_thread(os.fsync, file.fileno())
+
+        await asyncio.to_thread(os.replace, temporary_path, destination)
+        await _fsync_dir(parent_directory)
+
+    except Exception:
+        try:
+            await asyncio.to_thread(os.unlink, temporary_path)
+        except FileNotFoundError:
+            pass
+        raise
 
 
 async def read(path: str) -> bytes:
@@ -88,41 +109,6 @@ async def delete(path: str) -> None:
         return
 
     await _fsync_dir(_get_parent_dir(path))
-
-
-async def _atomic_write(data: bytes, destination: str) -> None:
-    """
-    Atomically write bytes to destination through a temporary file.
-    """
-    parent_directory = _get_parent_dir(destination)
-    temporary_path = _build_temp_path(destination)
-
-    try:
-        async with aiofiles.open(temporary_path, mode="wb") as file:
-            await file.write(data)
-            await file.flush()
-            await asyncio.to_thread(os.fsync, file.fileno())
-
-        await asyncio.to_thread(os.replace, temporary_path, destination)
-        await _fsync_dir(parent_directory)
-
-    except Exception:
-        try:
-            await asyncio.to_thread(os.unlink, temporary_path)
-        except FileNotFoundError:
-            pass
-        raise
-
-
-def _build_temp_path(destination: str) -> str:
-    """
-    Build a unique temporary path next to destination. The file
-    is created in the same directory to allow atomic replace.
-    """
-    parent_directory = _get_parent_dir(destination)
-    filename = os.path.basename(destination)
-    temporary_name = f".{filename}.{uuid.uuid4().hex}.tmp"
-    return os.path.join(parent_directory, temporary_name)
 
 
 def _get_parent_dir(path: str) -> str:
