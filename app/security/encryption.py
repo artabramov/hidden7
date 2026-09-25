@@ -3,13 +3,9 @@
 
 import os
 import struct
-from functools import lru_cache
 
-from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
-
-from app.config import get_config
 
 _MAGIC = b"HENC"
 _VERSION: int = 1
@@ -90,38 +86,3 @@ def decrypt_passphrase(ciphertext: bytes, password: bytes) -> bytes:
         raise ValueError(
             "invalid password or corrupted data",
         ) from None
-
-
-def generate_fernet_key() -> str:
-    """
-    Generate a new Fernet encryption key and return it as a string.
-    """
-    return Fernet.generate_key().decode()
-
-
-@lru_cache(maxsize=1)
-def get_fernet() -> Fernet:
-    """
-    Load the configured Fernet encryption key from disk and return
-    a cached Fernet instance.
-    """
-    config = get_config()
-    with open(config.FERNET_ENCRYPTION_KEY_PATH, "r", encoding="utf-8") as f:
-        key = f.read().strip()
-    return Fernet(key.encode())
-
-
-def encrypt_string(value: str) -> str:
-    """
-    Encrypt a string with the configured Fernet instance and return
-    the encoded token as a string.
-    """
-    return get_fernet().encrypt(value.encode()).decode()
-
-
-def decrypt_string(value: str) -> str:
-    """
-    Decrypt a Fernet token with the configured Fernet instance and
-    return the plaintext string.
-    """
-    return get_fernet().decrypt(value.encode()).decode()

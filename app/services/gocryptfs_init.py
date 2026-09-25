@@ -9,7 +9,7 @@ from app.constants import GOCRYPTFS_PASSPHRASE_LENGTH
 from app.errors import BadGatewayError
 from app.locks import lock_manager
 from app.io import delete, isfile, write
-from app.security.encryption import encrypt_passphrase, generate_fernet_key
+from app.security.encryption import encrypt_passphrase
 from app.security.randoms import generate_random_string
 from app.runtime.cipherdir import cipherdir_create, is_cipherdir_created
 from app.runtime.versity import versity_create, is_versity_created
@@ -28,7 +28,7 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
     """
     Initialize encrypted storage by generating and encrypting a random
     gocryptfs passphrase, initializing the cipherdir, creating the
-    internal application keys, and persisting all created secrets.
+    VersityGW root credentials, and persisting all created secrets.
 
     Initialization is not transactional. If any step fails, the
     function performs best-effort cleanup of artifacts created during
@@ -45,10 +45,6 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
             log.warning("msg=cipherdir_already_exists")
             raise BadGatewayError
 
-        if await isfile(config.FERNET_ENCRYPTION_KEY_PATH):
-            log.warning("msg=fernet_key_already_exists")
-            raise BadGatewayError
-
         if await is_versity_created(
             config.VERSITY_ACCESS_KEY_PATH,
             config.VERSITY_SECRET_KEY_PATH,
@@ -62,8 +58,6 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
             master_password.encode("utf-8"),
         )
 
-        fernet_key = generate_fernet_key()
-
         try:
             await write(
                 config.GOCRYPTFS_PASSPHRASE_PATH,
@@ -73,11 +67,6 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
             await cipherdir_create(
                 passphrase,
                 config.INSTALL_CIPHERDIR
-            )
-
-            await write(
-                config.FERNET_ENCRYPTION_KEY_PATH,
-                fernet_key.encode("utf-8")
             )
 
             access_key, secret_key = await versity_create(
@@ -100,7 +89,6 @@ async def gocryptfs_init(master_password: str) -> tuple[str, str]:
                 "gocryptfs.diriv"
             ))
 
-            await delete(config.FERNET_ENCRYPTION_KEY_PATH)
             await delete(config.VERSITY_ACCESS_KEY_PATH)
             await delete(config.VERSITY_SECRET_KEY_PATH)
 

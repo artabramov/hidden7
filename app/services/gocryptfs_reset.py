@@ -56,6 +56,5 @@ async def gocryptfs_reset(master_password: str) -> None:
                     await delete(path)
 
         await delete(config.GOCRYPTFS_PASSPHRASE_PATH)
-        await delete(config.FERNET_ENCRYPTION_KEY_PATH)
         await delete(config.VERSITY_ACCESS_KEY_PATH)
         await delete(config.VERSITY_SECRET_KEY_PATH)

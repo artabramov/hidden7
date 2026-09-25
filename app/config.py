@@ -8,7 +8,6 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 from app.constants import (
     GOCRYPTFS_PASSPHRASE_FILENAME,
-    FERNET_ENCRYPTION_KEY_FILENAME,
     VERSITY_ACCESS_KEY_FILENAME,
     VERSITY_SECRET_KEY_FILENAME,
     VERSITY_DATA_DIRNAME,
@@ -50,13 +49,6 @@ class Config(BaseSettings):
         return os.path.join(
             self.INSTALL_SECRETS,
             GOCRYPTFS_PASSPHRASE_FILENAME,
-        )
-
-    @cached_property
-    def FERNET_ENCRYPTION_KEY_PATH(self) -> str:
-        return os.path.join(
-            self.INSTALL_SECRETS,
-            FERNET_ENCRYPTION_KEY_FILENAME,
         )
 
     @cached_property

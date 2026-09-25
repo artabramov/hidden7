@@ -8,8 +8,6 @@ GOCRYPTFS_PASSPHRASE_FILENAME = "gocryptfs_passphrase.enc"
 
 WATCHDOG_HEARTBEAT_PATH = "/tmp/gocryptfs-watchdog.touch"
 
-FERNET_ENCRYPTION_KEY_FILENAME = "fernet_encryption.key"
-
 VERSITY_ACCESS_KEY_LENGTH = 20
 VERSITY_ACCESS_KEY_FILENAME = "versity_access.key"
 
