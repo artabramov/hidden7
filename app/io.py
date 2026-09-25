@@ -2,38 +2,15 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import asyncio
-import hashlib
 import os
 import uuid
-from typing import AsyncIterable, AsyncIterator, Protocol
+from typing import AsyncIterable, AsyncIterator
 
 import aiofiles
 import aiofiles.os
 import aiofiles.ospath
 
 from app.constants import FILE_CHUNK_SIZE_BYTES
-
-
-class AsyncReadable(Protocol):
-    """Async source that returns bytes from read(size)."""
-
-    async def read(self, size: int = -1) -> bytes: ...
-
-
-async def get_filesize(path: str) -> int:
-    """Return the size of the filesystem object in bytes."""
-    stats = await aiofiles.os.stat(path)
-    return stats.st_size
-
-
-async def get_file_hash(path: str) -> str:
-    """Return a hexadecimal MD5 hash of the file, used as S3 ETag."""
-    digest = hashlib.md5(usedforsecurity=False)
-
-    async for chunk in iter_read(path):
-        digest.update(chunk)
-
-    return digest.hexdigest()
 
 
 async def listdir(path: str) -> list[str]:
@@ -52,9 +29,7 @@ async def isdir(path: str) -> bool:
 
 
 async def ismount(path: str) -> bool:
-    """
-    Return whether the path is a mount point.
-    """
+    """Return whether the path is a mount point."""
     return await aiofiles.ospath.ismount(path)
 
 
@@ -67,14 +42,7 @@ async def mktree(path: str) -> None:
     created = await asyncio.to_thread(_makedirs_sync, path)
 
     for directory in reversed(created):
-        await _fsync_directory(_parent_dir(directory))
-
-
-async def rmdir(path: str) -> None:
-    """Remove an empty directory and persist the directory entry update."""
-    parent = _parent_dir(path)
-    await aiofiles.os.rmdir(path)
-    await _fsync_directory(parent)
+        await _fsync_dir(_get_parent_dir(directory))
 
 
 async def rmtree(path: str) -> None:
@@ -93,37 +61,7 @@ async def rmtree(path: str) -> None:
         else:
             await delete(child)
 
-    await rmdir(path)
-
-
-async def touch(path: str) -> None:
-    """
-    Create an empty file if it does not exist, or update its
-    modification time if it does. The parent directory is fsynced.
-    """
-    parent = _parent_dir(path)
-    await asyncio.to_thread(_touch_sync, path)
-    await _fsync_directory(parent)
-
-
-async def upload(
-    file: AsyncReadable,
-    destination: str,
-) -> None:
-    """
-    Atomically write data from an async readable source to destination.
-    Data is read in chunks, written to a temporary file in the same
-    directory, then flushed, fsynced, atomically replaced, and the
-    parent directory is fsynced.
-    """
-    async def data_iter() -> AsyncIterator[bytes]:
-        while True:
-            chunk = await file.read(FILE_CHUNK_SIZE_BYTES)
-            if not chunk:
-                break
-            yield chunk
-
-    await _atomic_write_stream(data_iter(), destination)
+    await _rmdir(path)
 
 
 async def write(
@@ -157,9 +95,7 @@ async def read(path: str) -> bytes:
     return bytes(result)
 
 
-async def delete(
-    path: str,
-) -> None:
+async def delete(path: str) -> None:
     """
     Delete a file and persist the directory entry update. The file
     is unlinked and the parent directory is fsynced if the deletion
@@ -170,64 +106,7 @@ async def delete(
     except FileNotFoundError:
         return
 
-    await _fsync_directory(_parent_dir(path))
-
-
-async def copy(
-    source: str,
-    destination: str,
-) -> None:
-    """
-    Copy a file to destination using chunked asynchronous I/O. Data is
-    read in chunks, written to a temporary file, then flushed, fsynced,
-    atomically replaced, and the parent directory is fsynced.
-    """
-    async def source_iter() -> AsyncIterator[bytes]:
-        async for chunk in iter_read(source):
-            yield chunk
-
-    await _atomic_write_stream(source_iter(), destination)
-
-
-async def concat(sources: list[str], destination: str) -> list[str]:
-    """
-    Concatenate files into destination using chunked asynchronous I/O.
-    Sources are appended in the given order, and the file is written
-    atomically like a single copy. Returns the MD5 hash of every
-    source in the same order, computed while the data is written.
-    """
-    hashes: list[str] = []
-
-    async def sources_iter() -> AsyncIterator[bytes]:
-        for source in sources:
-            digest = hashlib.md5(usedforsecurity=False)
-
-            async for chunk in iter_read(source):
-                digest.update(chunk)
-                yield chunk
-
-            hashes.append(digest.hexdigest())
-
-    await _atomic_write_stream(sources_iter(), destination)
-
-    return hashes
-
-
-async def rename(source: str, destination: str) -> None:
-    """
-    Atomically rename or replace a file or directory. The operation
-    uses os.replace, and affected parent directories are fsynced.
-    """
-    await asyncio.to_thread(os.replace, source, destination)
-
-    source_parent = _parent_dir(source)
-    destination_parent = _parent_dir(destination)
-
-    if source_parent == destination_parent:
-        await _fsync_directory(destination_parent)
-    else:
-        await _fsync_directory(source_parent)
-        await _fsync_directory(destination_parent)
+    await _fsync_dir(_get_parent_dir(path))
 
 
 async def iter_read(
@@ -256,7 +135,7 @@ async def _atomic_write_stream(
     a temporary file, then flushed, fsynced, atomically replaced, and
     the parent directory is fsynced.
     """
-    parent_directory = _parent_dir(destination)
+    parent_directory = _get_parent_dir(destination)
     temporary_path = _build_temp_path(destination)
 
     try:
@@ -268,7 +147,7 @@ async def _atomic_write_stream(
             await asyncio.to_thread(os.fsync, file.fileno())
 
         await asyncio.to_thread(os.replace, temporary_path, destination)
-        await _fsync_directory(parent_directory)
+        await _fsync_dir(parent_directory)
 
     except Exception:
         try:
@@ -300,23 +179,18 @@ def _makedirs_sync(path: str) -> list[str]:
     return created
 
 
-def _touch_sync(path: str) -> None:
-    with open(path, "a"):
-        os.utime(path, None)
-
-
 def _build_temp_path(destination: str) -> str:
     """
     Build a unique temporary path next to destination. The file
     is created in the same directory to allow atomic replace.
     """
-    parent_directory = _parent_dir(destination)
+    parent_directory = _get_parent_dir(destination)
     filename = os.path.basename(destination)
     temporary_name = f".{filename}.{uuid.uuid4().hex}.tmp"
     return os.path.join(parent_directory, temporary_name)
 
 
-def _parent_dir(path: str) -> str:
+def _get_parent_dir(path: str) -> str:
     """
     Return the parent directory of a path. Paths without a directory
     resolve to the current directory.
@@ -325,13 +199,20 @@ def _parent_dir(path: str) -> str:
     return parent_directory or "."
 
 
-async def _fsync_directory(path: str) -> None:
+async def _fsync_dir(path: str) -> None:
     """
     Fsync a directory to persist metadata changes. Used after create,
-    replace, rename, and delete operations.
+    replace, and delete operations.
     """
     directory_fd = await asyncio.to_thread(os.open, path, os.O_RDONLY)
     try:
         await asyncio.to_thread(os.fsync, directory_fd)
     finally:
         await asyncio.to_thread(os.close, directory_fd)
+
+
+async def _rmdir(path: str) -> None:
+    """Remove an empty directory and persist the directory entry update."""
+    parent = _get_parent_dir(path)
+    await aiofiles.os.rmdir(path)
+    await _fsync_dir(parent)
