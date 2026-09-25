@@ -30,16 +30,13 @@ async def ismount(path: str) -> bool:
     return await aiofiles.ospath.ismount(path)
 
 
-async def mktree(path: str) -> None:
+async def mkdir(path: str) -> None:
     """
-    Create a directory together with its missing parents and persist
-    the directory entry updates. An existing directory is left as is,
-    and every level actually created is fsynced through its parent.
+    Create a single directory and persist the parent directory entry.
+    The parent directory must already exist.
     """
-    created = await asyncio.to_thread(_makedirs_sync, path)
-
-    for directory in reversed(created):
-        await _fsync_dir(_get_parent_dir(directory))
+    await aiofiles.os.mkdir(path)
+    await _fsync_dir(_get_parent_dir(path))
 
 
 async def rmtree(path: str) -> None:
@@ -115,28 +112,6 @@ async def _atomic_write(data: bytes, destination: str) -> None:
         except FileNotFoundError:
             pass
         raise
-
-
-def _makedirs_sync(path: str) -> list[str]:
-    """
-    Create a directory tree and return the directories that were
-    missing, ordered from the deepest to the shallowest one.
-    """
-    created: list[str] = []
-    cursor = os.path.abspath(path)
-
-    while not os.path.isdir(cursor):
-        created.append(cursor)
-        parent = os.path.dirname(cursor)
-
-        if parent == cursor:
-            break
-
-        cursor = parent
-
-    os.makedirs(path, exist_ok=True)
-
-    return created
 
 
 def _build_temp_path(destination: str) -> str:

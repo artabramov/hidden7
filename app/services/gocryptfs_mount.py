@@ -6,7 +6,7 @@ import logging
 from app.config import get_config
 from app.errors import UnauthorizedError
 from app.locks import lock_manager
-from app.io import isdir, mktree, read
+from app.io import isdir, mkdir, read
 from app.runtime.cipherdir import cipherdir_mount, cipherdir_unmount
 from app.runtime.versity import versity_start, versity_stop
 from app.security.encryption import decrypt_passphrase
@@ -39,7 +39,7 @@ async def gocryptfs_mount(master_password: str) -> None:
             raise UnauthorizedError
 
         if not await isdir(config.INSTALL_MOUNTPOINT):
-            await mktree(config.INSTALL_MOUNTPOINT)
+            await mkdir(config.INSTALL_MOUNTPOINT)
 
         await cipherdir_mount(
             passphrase=passphrase_bytes.decode("utf-8"),
@@ -49,10 +49,10 @@ async def gocryptfs_mount(master_password: str) -> None:
 
         try:
             if not await isdir(config.VERSITY_DATA_PATH):
-                await mktree(config.VERSITY_DATA_PATH)
+                await mkdir(config.VERSITY_DATA_PATH)
 
             if not await isdir(config.VERSITY_IAM_PATH):
-                await mktree(config.VERSITY_IAM_PATH)
+                await mkdir(config.VERSITY_IAM_PATH)
 
             access_key = (
                 await read(config.VERSITY_ACCESS_KEY_PATH)
