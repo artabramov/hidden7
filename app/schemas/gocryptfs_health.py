@@ -32,7 +32,9 @@ class GocryptfsHealthResponse(BaseModel):
         ),
     )
     unix_timestamp: int = Field(
-        description="Current Unix timestamp in the host local timezone.",
+        description=(
+            "Current instant as Unix time (seconds since 1970-01-01 UTC)."
+        ),
     )
     timezone_name: str = Field(
         description="Host local timezone name (IANA, tzname, or fallback).",

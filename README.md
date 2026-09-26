@@ -60,8 +60,8 @@ gateway.
         Internals                          Interfaces
 
 ┌─────────────────────────┐
-│ VersityGW               │------- S3-compatible API and WebGUI
-│ (S3, IAM, WebGUI)       │        provide storage and IAM access
+│ VersityGW               │------- S3 API and WebGUI provide
+│ (S3, IAM, WebGUI)       │        storage and IAM access
 └─────────────────────────┘
              │
 ┌─────────────────────────┐
@@ -178,14 +178,14 @@ Copyright (c) 2026 Artem Abramov
 
 ```text
 app/
-├── main.py                   # FastAPI setup, middleware, routers
-├── config.py                 # settings loaded from .env
+├── main.py                   # setup, middleware, routers
+├── config.py                 # settings from .env
 ├── constants.py
 ├── context.py                # request context: ID and timing
 ├── errors.py                 # management API HTTP errors
 ├── handlers.py               # exception handlers
 ├── io.py                     # async filesystem I/O
-├── locks.py                  # async locks for lifecycle operations
+├── locks.py                  # async lifecycle locks
 ├── log.py                    # logging setup and context filter
 ├── version.py
 ├── dependencies/
@@ -197,10 +197,10 @@ app/
 ├── schemas/                  # API request/response models
 ├── runtime/
 │   ├── cipherdir.py          # gocryptfs init, mount, unmount
-│   ├── versity.py            # VersityGW credentials, process control
-│   └── watchdog.py           # emergency unmount on runtime failure
+│   ├── versity.py            # VersityGW credentials and control
+│   └── watchdog.py           # emergency unmount on failure
 ├── security/
-│   ├── encryption.py         # scrypt + AES-GCM passphrase encryption
+│   ├── encryption.py         # scrypt + AES-GCM encryption
 │   └── randoms.py
-└── middleware/               # CORS, logging, context, security headers
+└── middleware/               # CORS, logging, context, security
 ```
