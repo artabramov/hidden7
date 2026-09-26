@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
-from app.schemas.gocryptfs_unmount import GocryptfsUnmountRequest
+from app.schemas.gocryptfs_auth import GocryptfsAuthRequest
 from app.services.gocryptfs_unmount import gocryptfs_unmount
 
 router = APIRouter(tags=["gocryptfs"])
@@ -39,7 +39,7 @@ router = APIRouter(tags=["gocryptfs"])
     summary="Unmount gocryptfs cipherdir.",
 )
 async def gocryptfs_unmount_router(
-    data: GocryptfsUnmountRequest,
+    data: GocryptfsAuthRequest,
 ) -> Response:
     """
     Unmounts encrypted application storage. It verifies the master

@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
-from app.schemas.gocryptfs_reset import GocryptfsResetRequest
+from app.schemas.gocryptfs_auth import GocryptfsAuthRequest
 from app.services.gocryptfs_reset import gocryptfs_reset
 
 router = APIRouter(tags=["gocryptfs"])
@@ -41,7 +41,7 @@ router = APIRouter(tags=["gocryptfs"])
     summary="Reset encrypted storage.",
 )
 async def gocryptfs_reset_router(
-    data: GocryptfsResetRequest,
+    data: GocryptfsAuthRequest,
 ) -> Response:
     """
     Permanently remove all encrypted storage data and secrets after

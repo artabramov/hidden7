@@ -4,10 +4,8 @@
 from fastapi import APIRouter, Depends, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
-from app.schemas.gocryptfs_reveal import (
-    GocryptfsRevealRequest,
-    GocryptfsRevealResponse,
-)
+from app.schemas.gocryptfs_auth import GocryptfsAuthRequest
+from app.schemas.gocryptfs_reveal import GocryptfsRevealResponse
 from app.services.gocryptfs_reveal import gocryptfs_reveal
 
 router = APIRouter(tags=["gocryptfs"])
@@ -43,7 +41,7 @@ router = APIRouter(tags=["gocryptfs"])
     summary="Reveal storage secrets.",
 )
 async def gocryptfs_reveal_router(
-    data: GocryptfsRevealRequest,
+    data: GocryptfsAuthRequest,
 ) -> GocryptfsRevealResponse:
     """
     Decrypts the stored gocryptfs passphrase with the provided master

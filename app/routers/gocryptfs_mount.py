@@ -4,7 +4,7 @@
 from fastapi import APIRouter, Depends, Response, status
 
 from app.dependencies.require_gocryptfs import require_gocryptfs
-from app.schemas.gocryptfs_mount import GocryptfsMountRequest
+from app.schemas.gocryptfs_auth import GocryptfsAuthRequest
 from app.services.gocryptfs_mount import gocryptfs_mount
 
 router = APIRouter(tags=["gocryptfs"])
@@ -45,7 +45,7 @@ router = APIRouter(tags=["gocryptfs"])
     summary="Mount gocryptfs cipherdir.",
 )
 async def gocryptfs_mount_router(
-    data: GocryptfsMountRequest,
+    data: GocryptfsAuthRequest,
 ) -> Response:
     """
     Mounts encrypted application storage. It decrypts the stored

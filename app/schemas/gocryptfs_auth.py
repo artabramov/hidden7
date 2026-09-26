@@ -1,4 +1,4 @@
-# app/schemas/gocryptfs_reset.py
+# app/schemas/gocryptfs_auth.py
 # SPDX-License-Identifier: Apache-2.0
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -6,12 +6,13 @@ from pydantic import BaseModel, ConfigDict, Field
 from app.pydantic.master_password import MASTER_PASSWORD_AUTH_DESCRIPTION
 
 
-class GocryptfsResetRequest(BaseModel):
+class GocryptfsAuthRequest(BaseModel):
     """
-    Request schema for resetting encrypted storage.
+    Request body for gocryptfs operations that authenticate with the
+    stored master password.
 
-    Authenticates with the existing master password; composition is
-    not validated.
+    Composition is not validated; correctness is verified by decrypting
+    the stored passphrase.
     """
 
     model_config = ConfigDict(
