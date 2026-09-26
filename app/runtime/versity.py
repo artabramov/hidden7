@@ -133,7 +133,7 @@ async def versity_start(
         if await is_versity_running():
             return
 
-        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+        await asyncio.sleep(config.VERSITY_POLL_INTERVAL_SECONDS)
 
     if process.returncode is not None:
         stderr = await process.stderr.read()
@@ -210,7 +210,7 @@ async def versity_stop() -> None:
         if _get_versity_pid() is None:
             return
 
-        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+        await asyncio.sleep(config.VERSITY_POLL_INTERVAL_SECONDS)
 
     log.warning("msg=versity_stop_timeout pid=%s", pid)
 
@@ -225,7 +225,7 @@ async def versity_stop() -> None:
         if _get_versity_pid() is None:
             return
 
-        await asyncio.sleep(config.VERSITY_STOP_POLL_INTERVAL_SECONDS)
+        await asyncio.sleep(config.VERSITY_POLL_INTERVAL_SECONDS)
 
     log.error("msg=versity_kill_timeout pid=%s", pid)
     raise InternalServerError
