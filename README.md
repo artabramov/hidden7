@@ -1,6 +1,6 @@
-# Hidden — encrypted self-hosted S3 storage
+# Hidden S3 — encrypted self-hosted S3 storage
 
-Hidden is S3-compatible object storage for sensitive data on privately
+This is S3-compatible object storage for sensitive data on privately
 managed infrastructure. It provides filesystem-level encryption
 independently of the S3 layer while maintaining full S3 compatibility.
 
@@ -37,6 +37,32 @@ If you like it, star it ⭐ — it helps discoverability. Thank you!
 - Encrypted filesystem: [gocryptfs](https://github.com/rfjakob/gocryptfs)
 - S3-compatible gateway: [VersityGW](https://github.com/versity/versitygw)
 - Architectural decisions: [ADR.md](./ADR.md)
+
+## Quick start
+
+Mount remote storage or create a local directory for the secrets volume:
+
+```sh
+sudo mkdir -p /mnt/hidden-secrets
+```
+
+Build and run the container:
+
+```sh
+make install FORCE=1
+```
+
+By default, the management interface is exposed on port `8081`. Use it
+to initialize and mount the encrypted storage and manage its state:
+
+[http://localhost:8081/docs](http://localhost:8081/docs)
+
+Once the storage is mounted, the S3 API is available on port `9000` and
+the WebGUI on port `8080`:
+
+[http://localhost:8080](http://localhost:8080)
+
+That's it — use your preferred S3-compatible client or the WebGUI.
 
 ## How it works
 
@@ -87,7 +113,7 @@ gateway.
 
 ## Use cases
 
-Hidden is designed for scenarios where data must remain protected
+The project is designed for scenarios where data must remain protected
 independently of the storage service and underlying infrastructure.
 Typical use cases include:
 
@@ -147,22 +173,6 @@ to access the decrypted filesystem directly.
 anywhere. If lost, the encrypted passphrase cannot be unlocked and the
 storage cannot be recovered.
 
-## Integration and migration
-
-Existing applications and tools can access the storage through the
-standard S3 API without requiring proprietary clients or data formats.
-The underlying POSIX layout also allows files and directories to be
-transferred directly when needed.
-
-Existing datasets can be imported without conversion, while stored data
-can be exported in the same way. This supports migration between Hidden
-and conventional filesystems, initial data seeding, and recovery outside
-the application.
-
-The S3 interface can be used with existing backup software, applications,
-scripts, and other S3-compatible tools, allowing the storage to be
-integrated into existing workflows.
-
 ## License
 
 This project is licensed under the **Apache License 2.0**
@@ -174,33 +184,3 @@ the terms of the Apache License 2.0.
 See [LICENSE](./LICENSE) for the full license text.
 
 Copyright (c) 2026 Artem Abramov
-
-
-```text
-app/
-├── main.py                   # setup, middleware, routers
-├── config.py                 # settings from .env
-├── constants.py
-├── context.py                # request context: ID and timing
-├── errors.py                 # management API HTTP errors
-├── handlers.py               # exception handlers
-├── io.py                     # async filesystem I/O
-├── locks.py                  # async lifecycle locks
-├── log.py                    # logging setup and context filter
-├── version.py
-├── dependencies/
-│   └── require_gocryptfs.py  # gocryptfs state checks
-├── pydantic/
-│   └── master_password.py    # master password validation
-├── routers/                  # gocryptfs management endpoints
-├── services/                 # gocryptfs lifecycle operations
-├── schemas/                  # API request/response models
-├── runtime/
-│   ├── cipherdir.py          # gocryptfs init, mount, unmount
-│   ├── versity.py            # VersityGW credentials and control
-│   └── watchdog.py           # emergency unmount on failure
-├── security/
-│   ├── encryption.py         # scrypt + AES-GCM encryption
-│   └── randoms.py
-└── middleware/               # CORS, logging, context, security
-```
