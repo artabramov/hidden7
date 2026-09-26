@@ -164,10 +164,10 @@ of the application.
 The protection model does not cover compromised runtime environments
 or recovery from a lost master password.
 
-- **Runtime host or container compromise.** While the filesystem is
-mounted, decrypted data exists inside the container. An attacker with
-sufficient privileges on the host or inside the container may be able
-to access the decrypted filesystem directly.
+- **Runtime host or container compromise.** While the encrypted
+filesystem is mounted, decrypted data exists inside the container.
+An attacker with sufficient privileges on the host or inside the
+container may be able to access the decrypted filesystem directly.
 
 - **Forgotten master password.** The `master password` is not stored
 anywhere. If lost, the encrypted passphrase cannot be unlocked and the
