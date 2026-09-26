@@ -65,8 +65,8 @@ gateway.
 └─────────────────────────┘
              │
 ┌─────────────────────────┐
-│ FastAPI application     │─────── REST API provides encrypted
-│ (management layer)      │        storage lifecycle management
+│ FastAPI application     │─────── OpenAPI provides gocryptfs
+│ (REST API)              │        lifecycle management
 └─────────────────────────┘
              │
 ┌─────────────────────────┐
@@ -105,17 +105,16 @@ snapshots, exports, and long-term data retention.
 
 ## What is protected
 
-The protection model covers scenarios where stored data, storage volumes,
-or the host system become physically accessible or exposed. Encryption
-remains effective independently of the S3 layer and application-level
-access controls.
+The protection model covers physical access to stored data, storage
+volumes, or the host system. Encryption remains independent of the S3
+layer and application-level access controls.
 
 - **Stolen host or unauthorized disk access.** The `cipherdir` contains
 encrypted data only. Physical access to the host or storage, raw disk
 access, filesystem recovery tools, or direct inspection of the encrypted
 volume do not expose plaintext file contents or names.
 
-- **Leaked volumes.** The `cipherdir` and `secrets` volumes are
+- **Leaked volume data.** The `cipherdir` and `secrets` volumes are
 protected independently. A copied or exposed `cipherdir` remains
 encrypted without the corresponding `gocryptfs` passphrase, while the
 passphrase stored in `secrets` is itself encrypted and cannot be used
@@ -136,33 +135,17 @@ of the application.
 
 ## What is not protected against
 
-The protection model does not cover access to decrypted data within a
-compromised runtime environment. Some filesystem metadata also remains
-visible as part of the standard gocryptfs protection model.
+The protection model does not cover compromised runtime environments
+or recovery from a lost master password.
 
 - **Runtime host or container compromise.** While the filesystem is
 mounted, decrypted data exists inside the container. An attacker with
 sufficient privileges on the host or inside the container may be able
 to access the decrypted filesystem directly.
 
-- **Filesystem metadata.** Following the standard `gocryptfs` protection
-model, filesystem metadata such as timestamps and approximate file sizes
-remains available to the underlying filesystem, while file contents and
-plaintext file and directory names remain encrypted.
-
-## Cautions
-
-The encryption model relies on the integrity of the storage volumes and
-availability of the required credentials. Loss or manual modification of
-critical data may make the storage inaccessible or unrecoverable.
-
 - **Forgotten master password.** The `master password` is not stored
 anywhere. If lost, the encrypted passphrase cannot be unlocked and the
 storage cannot be recovered.
-
-- **Manual modification of volumes.** The `cipherdir` and `secrets`
-volumes should not be modified manually. Direct changes may make the
-storage inconsistent or unrecoverable.
 
 ## Integration and migration
 
