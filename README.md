@@ -1,4 +1,4 @@
-# Hidden S3 — encrypted self-hosted S3 storage
+# Hidden — encrypted self-hosted S3 storage
 
 This is S3-compatible object storage for sensitive data on privately
 managed infrastructure. It provides filesystem-level encryption
