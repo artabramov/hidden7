@@ -23,7 +23,7 @@ log = logging.getLogger(__name__)
 # encrypted data therefore requires both the passphrase and the master
 # password.
 
-# NOTE (ADR-05): gocryptfs passphrase is provided throught tmpfs.
+# NOTE (ADR-05): gocryptfs passphrase is provided through tmpfs.
 # Command-line arguments and stdin are avoided to prevent exposure
 # in process listings (argv) and to bypass TTY-based input behavior.
 # The passphrase is written to a temporary file in tmpfs (/dev/shm)

@@ -195,24 +195,29 @@ Copyright (c) 2026 Artem Abramov
 
 ```text
 app/
-├── main.py              # FastAPI, middleware, routers
-├── config.py            # pydantic-settings from .env
+├── main.py                   # FastAPI setup, middleware, routers
+├── config.py                 # settings loaded from .env
 ├── constants.py
-├── errors.py            # 401/500/502/503 (без S3-ошибок)
-├── io.py                # async FS (aiofiles)
-├── locks.py             # in-process READ/WRITE locks
-├── handlers.py          # exception handlers
+├── context.py                # request context: ID and timing
+├── errors.py                 # management API HTTP errors
+├── handlers.py               # exception handlers
+├── io.py                     # async filesystem I/O
+├── locks.py                  # async locks for lifecycle operations
+├── log.py                    # logging setup and context filter
+├── version.py
 ├── dependencies/
-│   └── require_gocryptfs.py
-├── routers/             # 7 эндпоинтов gocryptfs
-├── services/            # бизнес-логика
-├── schemas/             # Pydantic request/response
+│   └── require_gocryptfs.py  # gocryptfs state checks
+├── pydantic/
+│   └── master_password.py    # master password validation
+├── routers/                  # gocryptfs management endpoints
+├── services/                 # gocryptfs lifecycle operations
+├── schemas/                  # API request/response models
 ├── runtime/
-│   ├── cipherdir.py     # gocryptfs init/mount/unmount
-│   ├── versity.py       # versitygw start/stop/credentials
-│   └── watchdog.py      # emergency unmount
+│   ├── cipherdir.py          # gocryptfs init, mount, unmount
+│   ├── versity.py            # VersityGW credentials, process control
+│   └── watchdog.py           # emergency unmount on runtime failure
 ├── security/
-│   ├── encryption.py    # scrypt+AES-GCM (passphrase encryption)
+│   ├── encryption.py         # scrypt + AES-GCM passphrase encryption
 │   └── randoms.py
-└── middleware/          # CORS, logging, security headers, request context
+└── middleware/               # CORS, logging, context, security headers
 ```

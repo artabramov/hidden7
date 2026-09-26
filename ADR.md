@@ -8,6 +8,6 @@ search across the project for details.
 - ADR-02: Application runs inside a Docker container.
 - ADR-03: gocryptfs is used for filesystem-level encryption.
 - ADR-04: gocryptfs passphrase is protected by master password.
-- ADR-05: gocryptfs passphrase is provided throught tmpfs.
+- ADR-05: gocryptfs passphrase is provided through tmpfs.
 - ADR-06: Cipherdir initialization is a one-time operation.
 - ADR-07: Cipherdir and secrets are stored in Docker volumes.
